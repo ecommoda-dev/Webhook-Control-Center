@@ -273,6 +273,24 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 .wh-activity-row:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
 .wh-activity-row:last-child  { border-bottom: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
 
+/* ── Filter Builder ───────────────────────────────────────────  */
+.wh-filter-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+.wh-filter-connector, .wh-filter-connector-spacer { width: 72px; flex-shrink: 0; }
+.wh-filter-field { flex: 1.3; min-width: 130px; }
+.wh-filter-op    { flex: 1.1; min-width: 150px; }
+.wh-filter-value { flex: 1; min-width: 100px; }
+.wh-filter-novalue { flex: 1; min-width: 100px; text-align: center; color: var(--text-muted); }
+.wh-filter-remove { flex-shrink: 0; padding: 6px 9px; color: var(--red); border-color: var(--red-border); background: var(--red-light); }
+.wh-filter-remove:hover { background: var(--red); color: #fff; }
+.wh-filter-preview { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+.wh-filter-preview code { font-family: var(--font-mono); direction: ltr; display: inline-block; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; margin-inline-start: 4px; word-break: break-all; }
+.field-toggle-btn { padding: 3px 9px; font-size: 10px; }
+
+/* ── Payload viewer / test-received list ─────────────────────── */
+.about-pre { font-family: var(--font-mono); font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; overflow-x: auto; white-space: pre; direction: ltr; text-align: left; line-height: 1.65; margin: 0; }
+.wh-badge-ok { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.wh-quick-uri-btn { margin-top: 6px; }
+
 /* ── Confirm Dialog ───────────────────────────────────────────  */
 .confirm-overlay       { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px; }
 .confirm-overlay.open  { display: flex; }
@@ -303,7 +321,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="hbtn" id="refreshBtn" onclick="doRefresh()"><span class="ico">↺</span> تحديث</button>
       <button class="hbtn active-user" id="activeUserBtn" onclick="doLogout()">👤 —</button>
       <button class="hbtn" id="aboutBtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-      <button class="hbtn ver-btn" onclick="openChangelog()">v1.0.0 📋</button>
+      <button class="hbtn ver-btn" onclick="openChangelog()">v1.1.0 📋</button>
       <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     </div>
   </div>
@@ -312,6 +330,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
   <div class="main-tabs-bar">
     <button class="main-tab-btn active" id="mainTab_manage"  onclick="switchMainTab('manage')">🪝 إدارة الويبهوكس</button>
     <button class="main-tab-btn"        id="mainTab_monitor" onclick="switchMainTab('monitor')">📡 المراقبة</button>
+    <button class="main-tab-btn"        id="mainTab_test"    onclick="switchMainTab('test')">🧪 تجربة الاستقبال</button>
     <button class="main-tab-btn"        id="mainTab_log"     onclick="switchMainTab('log')">📜 سجل العمليات</button>
   </div>
 
@@ -337,6 +356,22 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
        ══════════════════════════════════════════════════════════════ -->
   <div id="monitorTabContent" class="tab-panel">
     <div id="monitorContent"><div class="log-empty"><div class="loading-spinner"></div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       §TOOL — Test Receiver Tab
+       ══════════════════════════════════════════════════════════════ -->
+  <div id="testTabContent" class="tab-panel">
+    <div class="wh-toolbar">
+      <div class="wh-toolbar-left">
+        <span class="wh-count-chip">آخر الاستقبالات: <strong id="testCount">—</strong></span>
+      </div>
+      <button class="hbtn" style="color:var(--red);border-color:var(--red-border);" onclick="doClearTestReceived()">🗑 مسح الكل</button>
+    </div>
+    <div class="field-hint" style="margin-bottom:12px;">
+      لاستخدام التبويب ده: وقت إنشاء webhook جديد دوس "🧪 استقبال هنا (تجربة سريعة)" جنب حقل الـ URI — كده أي event حقيقي من شوبيفاي هيوصل ويظهر هنا، وممكن تشوف الـ payload الكامل قبل ما توصّل الـ topic ده لأداتك الحقيقية.
+    </div>
+    <div id="testList"><div class="log-empty">لسه ملوصلش أي webhook تجريبي</div></div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════
@@ -484,7 +519,18 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
     <div class="eco-modal-body">
       <div class="cl-version-block">
         <div class="cl-version-row">
-          <span class="cl-ver-badge">v1.0.0</span>
+          <span class="cl-ver-badge">v1.1.0</span>
+          <span class="cl-ver-date">15-08-2026</span>
+        </div>
+        <ul class="cl-items">
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>حقل "اسم الأداة" بقى مربوط بـ dropdown/اقتراحات (datalist) من قيم tool الفعلية في جدول logs — بدل الكتابة اليدوية</span></li>
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>Filter Builder — بناء شرط الـ filter بمربعات (حقل / عملية / قيمة) بدل كتابة صياغة شوبيفاي يدوي، مع معاينة حية ووضع متقدم (نص حر) للحالات المعقدة اللي محتاجة أقواس</span></li>
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>الأداة بقت تقدر تستقبل webhook بنفسها للتجربة (route جديد <code>POST /test-receive</code> بتحقق HMAC عن طريق CLIENT_SECRET) — زرار "🧪 استقبال هنا" وقت الإنشاء + تاب جديد "🧪 تجربة الاستقبال" لعرض الـ payloads الحقيقية اللي وصلت</span></li>
+        </ul>
+      </div>
+      <div class="cl-version-block">
+        <div class="cl-version-row">
+          <span class="cl-ver-badge old">v1.0.0</span>
           <span class="cl-ver-date">14-08-2026</span>
         </div>
         <ul class="cl-items">
@@ -514,8 +560,10 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 
           <h4>كيف تعمل — Workflow</h4>
           <ol>
-            <li>تاب "إدارة" → "➕ إنشاء Webhook جديد" → اختر topic + اكتب uri الأداة المستقبِلة + اسم الأداة (لازم يطابق TOOL_NAME بتاعها في D1) + الغرض.</li>
+            <li>تاب "إدارة" → "➕ إنشاء Webhook جديد" → اختر topic + اكتب uri الأداة المستقبِلة (أو دوس "🧪 استقبال هنا" لو بتجرّب) + اسم الأداة من القائمة (لازم يطابق TOOL_NAME بتاعها في D1) + الغرض.</li>
+            <li>الـ FILTER اختياري: ابني الشرط بالمربعات (حقل/عملية/قيمة) أو بدّل لوضع النص الحر لو محتاج أقواس/شروط معقدة.</li>
             <li>الأداة بتنفّذ <code>webhookSubscriptionCreate</code> عن طريق OAuth الخاص بيها (CLIENT_ID/CLIENT_SECRET) وتسجّل نسخة محلية في جدول <code>webhook_registry</code>.</li>
+            <li>لو استخدمت "🧪 استقبال هنا": أي event حقيقي من شوبيفاي هيوصل لنفس الأداة على <code>/test-receive</code>، ويظهر في تاب "🧪 تجربة الاستقبال" فيه الـ payload كامل — مفيدة قبل ما توصّل الـ topic لأداتك الحقيقية.</li>
             <li>تاب "المراقبة" → بيوري آخر نشاط لكل tool_name من جدول logs المشترك، وأي subscription اتشال من شوبيفاي بصمت.</li>
             <li>زرار "Reconcile مع شوبيفاي" (في تاب الإدارة) → مقارنة حية: أي subscription نشط محلياً بس مش موجود على شوبيفاي بيتعلّم "اتشال"، وأي subscription موجود على شوبيفاي بس مش مسجّل هنا (اتعمل من GraphiQL مثلاً) بيظهر في صندوق "غير مسجّل" مع خيار تسجيله.</li>
           </ol>
@@ -530,6 +578,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <tr><td><code>reconcile_subscriptions</code></td><td>مقارنة حية مع شوبيفاي — يكتشف الحذف الصامت + الاشتراكات غير المسجّلة</td></tr>
             <tr><td><code>get_monitoring_summary</code></td><td>تجميع من جدول logs المشترك — آخر نشاط + فشل آخر 24 ساعة لكل tool_name</td></tr>
             <tr><td><code>get_topics_reference</code></td><td>قائمة مرجعية لأشهر topics (مش كل القائمة — أي اسم تاني يتقبل ويتحقق منه شوبيفاي نفسه)</td></tr>
+            <tr><td><code>get_known_tool_names</code></td><td>قيم tool المميزة من جدول logs + اسم الأداة نفسها — بتغذي datalist حقل "اسم الأداة المستهدفة"</td></tr>
+            <tr><td><code>get_test_received</code> / <code>clear_test_received</code></td><td>عرض/مسح آخر 50 webhook وصلوا على <code>/test-receive</code></td></tr>
+            <tr><td><code>POST /test-receive</code> (مش action، path منفصل)</td><td>الـ route اللي بيستقبل webhooks حقيقية من شوبيفاي للتجربة — HMAC بـ CLIENT_SECRET، من غير login</td></tr>
           </table>
         </div>
       </details>
@@ -540,8 +591,10 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
           <h4>FEATURE MAP</h4>
           <ul>
             <li><code>§AUTH</code> — Universal D1 Auth (check_employee / register_pin / verify_employee / log_logout / get_employees)</li>
-            <li><code>§WEBHOOKS</code> (Worker) — كل منطق الإدارة والـ reconcile والمراقبة</li>
-            <li><code>§TOOL-JS</code> (HTML) — Management tab + Monitoring tab + Webhook form modal</li>
+            <li><code>§WEBHOOKS</code> (Worker) — كل منطق الإدارة والـ reconcile والمراقبة + get_known_tool_names</li>
+            <li><code>§TEST-RECEIVE</code> (Worker) — <code>handleTestReceive</code> (route <code>/test-receive</code>، بره الـ WORKER_SECRET gate) + get_test_received / clear_test_received</li>
+            <li><code>§HELPERS::safeEqual / verifyShopifyHmac</code> — نفس نمط webhook-receivers.md، بس بـ CLIENT_SECRET بدل SHOPIFY_WEBHOOK_SECRET (لأن كل subscriptions الأداة دي API-registered)</li>
+            <li><code>§TOOL-JS</code> (HTML) — Management tab + Monitoring tab + Test Receiver tab + Webhook form modal + Filter Builder</li>
             <li><code>§LOG-ENDPOINTS</code> — get_logs / get_logs_count / get_logs_export (نمط v2 — pagination 100/صفحة)</li>
           </ul>
 
@@ -550,14 +603,19 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li><code>currentEmployee</code> — {username, displayName} في الذاكرة فقط (لا localStorage)</li>
             <li><code>LS_URL = 'webhook_control_worker_url'</code> · <code>LS_SECRET = 'webhook_control_worker_secret'</code></li>
             <li><code>TOOL_NAME = 'webhook_control'</code> — قيمة tool في جدول logs</li>
-            <li><code>webhook_registry</code> — جدول D1 جديد (مش من الـ schema الأساسي) — بيربط subscription_gid بمعلومات محلية (tool_name/purpose/notes) مش موجودة في شوبيفاي أصلاً</li>
+            <li><code>webhook_registry</code> — جدول D1 (مش من الـ schema الأساسي) — بيربط subscription_gid بمعلومات محلية (tool_name/purpose/notes) مش موجودة في شوبيفاي أصلاً</li>
+            <li><code>test_received_webhooks</code> — جدول D1 تاني، بيخزّن كل payload وصل على <code>/test-receive</code> (خام، JSON نصي)</li>
+            <li><code>filterRowsState</code> (HTML) — حالة الـ Filter Builder الحالية في الذاكرة، بتتحول لصيغة شوبيفاي عن طريق <code>buildFilterFromRows()</code></li>
           </ul>
 
           <h4>NOTES</h4>
           <ul>
             <li>⚠️ <strong>Ownership trap:</strong> list_subscriptions/reconcile بيشوفوا بس الـ subscriptions اللي اتسجلت من نفس CLIENT_ID بتاع الأداة دي. أي webhook اتسجل من GraphiQL App أو app تاني — الأداة مش هتقدر تديره، بس "Reconcile" ممكن يوريه كـ "untracked" لو لسه شغال على نفس المتجر (مش دايماً، حسب صلاحيات الـ app).</li>
             <li>مفيش delivery history حقيقي من شوبيفاي — تاب "المراقبة" بيعتمد على (1) هل الـ subscription لسه موجود على شوبيفاي (Reconcile) و (2) آخر مرة الأداة المستقبِلة كتبت log — مش على نسبة نجاح فعلية للتسليم.</li>
-            <li>حقل "اسم الأداة" وقت الإنشاء لازم يطابق <code>TOOL_NAME</code> بالظبط في الـ Worker المستقبِل عشان تاب المراقبة يقدر يربطهم — مطابقة نصيّة بسيطة، من غير تحقق تلقائي.</li>
+            <li>حقل "اسم الأداة" وقت الإنشاء بقى datalist من <code>get_known_tool_names</code> — بس لسه ممكن تكتب اسم جديد مش موجود لسه (لأداة لسه ما اتبنتش)، القائمة اقتراح مش قفل.</li>
+            <li>Filter Builder ببناء شروط متتالية (AND/OR) بس — من غير تجميع بالأقواس. أي حالة محتاجة أقواس (زي <code>status:active AND (product_type:Music OR product_type:Movies)</code>) لازم "وضع متقدم (نص حر)".</li>
+            <li>INCLUDE FIELDS لسه نص حر (سطر أو فاصلة لكل حقل) — القيم المتاحة بتختلف حسب الـ topic ومفيش API من شوبيفاي بيرجّعها، فمفيش dropdown ليها حالياً.</li>
+            <li>⚠️ <code>/test-receive</code> بيتحقق بـ HMAC مش WORKER_SECRET — أي حد يعرف الرابط ده وعنده CLIENT_SECRET الصحيح (يعني بس شوبيفاي فعلياً) يقدر يبعتله. البيانات المستلمة بتتخزن خام كما هي في D1، فلو فيها بيانات عميل حساسة، متنساش تمسحها بزرار "🗑 مسح الكل" بعد التجربة.</li>
             <li>Log tab بيستخدم نمط v2 (pagination من السيرفر، 100 صف/صفحة) بدل التحميل الكامل + فلترة client-side القديمة.</li>
           </ul>
         </div>
@@ -587,13 +645,15 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
         <div class="field-group">
           <span class="field-label">URI (الـ Worker المستقبِل)</span>
           <input type="text" class="field-input" id="whUri" style="font-family:var(--font-mono);direction:ltr;text-align:left;" />
+          <button class="hbtn wh-quick-uri-btn" type="button" onclick="useSelfTestUri()">🧪 استقبال هنا (تجربة سريعة)</button>
         </div>
       </div>
       <div class="field-row">
         <div class="field-group">
           <span class="field-label">اسم الأداة المستهدفة</span>
-          <input type="text" class="field-input" id="whToolName" />
-          <span class="field-hint">لازم يطابق TOOL_NAME بتاع الـ Worker المستقبِل عشان تاب المراقبة يشتغل صح</span>
+          <input type="text" class="field-input" id="whToolName" list="toolNamesDatalist" />
+          <datalist id="toolNamesDatalist"></datalist>
+          <span class="field-hint">لازم يطابق TOOL_NAME بتاع الـ Worker المستقبِل عشان تاب المراقبة يشتغل صح — دوّس "🧪 استقبال هنا" واختار اسم الأداة الحالية (webhook_control) لو بتجرّب بس</span>
         </div>
         <div class="field-group">
           <span class="field-label">الغرض</span>
@@ -601,8 +661,21 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
         </div>
       </div>
       <div class="field-group">
-        <span class="field-label">FILTER (اختياري — Shopify search syntax)</span>
-        <input type="text" class="field-input" id="whFilter" style="font-family:var(--font-mono);direction:ltr;text-align:left;" placeholder="مثال: financial_status:paid" />
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <span class="field-label">FILTER (اختياري — Shopify search syntax)</span>
+          <button class="hbtn field-toggle-btn" type="button" id="whFilterModeToggle" onclick="toggleFilterMode()">✏️ وضع متقدم (نص حر)</button>
+        </div>
+
+        <div id="whFilterBuilderBlock">
+          <div id="whFilterRows"></div>
+          <button class="hbtn" type="button" onclick="addFilterRow()">➕ إضافة شرط</button>
+          <div class="wh-filter-preview">المعاينة:<code id="whFilterPreview">—</code></div>
+        </div>
+
+        <div id="whFilterAdvancedBlock" style="display:none;">
+          <input type="text" class="field-input" id="whFilterAdvanced" style="font-family:var(--font-mono);direction:ltr;text-align:left;" placeholder="مثال: status:active AND (product_type:Music OR product_type:Movies)" />
+          <span class="field-hint">الوضع الحر بيدعم الأقواس والحالات المعقدة — الـ Builder مبني على شروط متتالية بس (AND/OR) من غير تجميع بالأقواس</span>
+        </div>
       </div>
       <div class="field-row">
         <div class="field-group">
@@ -623,6 +696,21 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="btn-modal-cancel" id="whDeleteBtn" style="display:none;color:var(--red);border-color:var(--red-border);" onclick="confirmDeleteWebhook()">🗑 حذف</button>
       <button class="btn-modal-cancel" onclick="closeWebhookModal()">إلغاء</button>
       <button class="btn-modal-save" id="whSaveBtn" onclick="submitWebhookModal()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     Payload Viewer Modal (Test Receiver tab)
+     ══════════════════════════════════════════════════════════════ -->
+<div class="eco-overlay" id="payloadModalOverlay" onclick="if(event.target===this)closePayloadModal()">
+  <div class="eco-modal">
+    <div class="eco-modal-hdr">
+      <span id="payloadModalTitle">👁 Payload</span>
+      <button class="modal-close-x" onclick="closePayloadModal()">✕</button>
+    </div>
+    <div class="eco-modal-body">
+      <pre class="about-pre" id="payloadModalBody"></pre>
     </div>
   </div>
 </div>
@@ -1003,6 +1091,7 @@ async function finishLogin(username, displayName) {
 
   // ── CUSTOMIZE: post-login load ──────────────────────────────
   loadTopicsReference();
+  loadKnownToolNames();
   loadManagement();
   // ─────────────────────────────────────────────────────────────
 }
@@ -1034,9 +1123,10 @@ function updateLoginSettingsBtnState() {
 // ══════════════════════════════════════════════════════════════
 // §TOOL-JS — Main tab switching
 // ══════════════════════════════════════════════════════════════
-const MAIN_TABS = ['manage', 'monitor', 'log'];
+const MAIN_TABS = ['manage', 'monitor', 'test', 'log'];
 let currentMainTab = 'manage';
 let manageLoaded = false;
+let testLoaded = false;
 let logLoaded = false;
 
 function switchMainTab(tab) {
@@ -1047,6 +1137,7 @@ function switchMainTab(tab) {
   });
   if (tab === 'manage' && !manageLoaded) { manageLoaded = true; loadManagement(); }
   if (tab === 'monitor') loadMonitoring();
+  if (tab === 'test' && !testLoaded) { testLoaded = true; loadTestReceived(); }
   if (tab === 'log' && !logLoaded) loadLog(true);
 }
 
@@ -1056,6 +1147,15 @@ async function loadTopicsReference() {
     const data = await apiGet('get_topics_reference');
     document.getElementById('topicsDatalist').innerHTML =
       (data.topics || []).map(t => `<option value="${t.topic}">${t.event}</option>`).join('');
+  } catch (err) { /* non-critical — form still accepts free text */ }
+}
+
+// ── §TOOL::knownToolNames ────────────────────────────────────────
+async function loadKnownToolNames() {
+  try {
+    const data = await apiGet('get_known_tool_names');
+    document.getElementById('toolNamesDatalist').innerHTML =
+      (data.toolNames || []).map(t => `<option value="${t}"></option>`).join('');
   } catch (err) { /* non-critical — form still accepts free text */ }
 }
 
@@ -1148,6 +1248,99 @@ function parseIncludeFieldsInput(text) {
   return text.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
 }
 
+// ── §TOOL::filterBuilder ─────────────────────────────────────────
+let whFilterMode = 'builder'; // 'builder' | 'advanced'
+let filterRowsState = [];
+
+const FILTER_OPS = [
+  { value: ':',   label: 'يساوي / يحتوي' },
+  { value: '>',   label: 'أكبر من' },
+  { value: '>=',  label: 'أكبر من أو يساوي' },
+  { value: '<',   label: 'أصغر من' },
+  { value: '<=',  label: 'أصغر من أو يساوي' },
+  { value: '*',   label: 'موجود (مش فاضي)' },
+  { value: 'not', label: 'لا يساوي (نفي)' },
+];
+
+function renderFilterRows() {
+  const wrap = document.getElementById('whFilterRows');
+  wrap.innerHTML = filterRowsState.map((r, i) => `
+    <div class="wh-filter-row">
+      ${i > 0
+        ? `<select class="field-select wh-filter-connector" onchange="filterRowsState[${i}].connector=this.value;updateFilterPreview()">
+             <option value="AND" ${r.connector === 'AND' ? 'selected' : ''}>AND</option>
+             <option value="OR" ${r.connector === 'OR' ? 'selected' : ''}>OR</option>
+           </select>`
+        : '<span class="wh-filter-connector-spacer"></span>'}
+      <input type="text" class="field-input wh-filter-field" placeholder="اسم الحقل، مثال: variants.price" value="${r.field}"
+        style="direction:ltr;text-align:left;font-family:var(--font-mono);"
+        oninput="filterRowsState[${i}].field=this.value;updateFilterPreview()" />
+      <select class="field-select wh-filter-op" onchange="filterRowsState[${i}].op=this.value;renderFilterRows();">
+        ${FILTER_OPS.map(o => `<option value="${o.value}" ${r.op === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+      </select>
+      ${r.op !== '*'
+        ? `<input type="text" class="field-input wh-filter-value" placeholder="القيمة" value="${r.value}"
+             style="direction:ltr;text-align:left;" oninput="filterRowsState[${i}].value=this.value;updateFilterPreview()" />`
+        : '<span class="wh-filter-novalue">—</span>'}
+      <button class="hbtn wh-filter-remove" type="button" onclick="removeFilterRow(${i})" title="حذف الشرط">✕</button>
+    </div>`).join('');
+  updateFilterPreview();
+}
+function addFilterRow() {
+  filterRowsState.push({ field: '', op: ':', value: '', connector: 'AND' });
+  renderFilterRows();
+}
+function removeFilterRow(i) {
+  filterRowsState.splice(i, 1);
+  if (!filterRowsState.length) filterRowsState.push({ field: '', op: ':', value: '', connector: 'AND' });
+  renderFilterRows();
+}
+function buildFilterFromRows() {
+  return filterRowsState
+    .filter(r => r.field.trim() && (r.op === '*' || r.value.trim()))
+    .map((r, idx) => {
+      const f = r.field.trim();
+      let piece;
+      if (r.op === '*')       piece = `${f}:*`;
+      else if (r.op === 'not') piece = `-${f}:${r.value.trim()}`;
+      else                     piece = `${f}:${r.op === ':' ? '' : r.op}${r.value.trim()}`;
+      return idx === 0 ? piece : `${r.connector} ${piece}`;
+    }).join(' ');
+}
+function updateFilterPreview() {
+  const el = document.getElementById('whFilterPreview');
+  if (el) el.textContent = buildFilterFromRows() || '(فاضي — هيستقبل كل الأحداث بدون فلترة)';
+}
+function applyFilterModeUI() {
+  document.getElementById('whFilterBuilderBlock').style.display  = whFilterMode === 'builder'  ? 'block' : 'none';
+  document.getElementById('whFilterAdvancedBlock').style.display = whFilterMode === 'advanced' ? 'block' : 'none';
+  document.getElementById('whFilterModeToggle').textContent = whFilterMode === 'builder' ? '✏️ وضع متقدم (نص حر)' : '🔨 وضع البناء';
+}
+function toggleFilterMode() {
+  if (whFilterMode === 'builder') {
+    document.getElementById('whFilterAdvanced').value = buildFilterFromRows();
+    whFilterMode = 'advanced';
+  } else {
+    whFilterMode = 'builder';
+    showToast('الرجوع لوضع البناء مش بيقرأ النص الحر تلقائي — لو غيّرت فيه، حدّث المربعات يدوي لو عايز تفضل فيهم', 'neutral', 5000);
+  }
+  applyFilterModeUI();
+}
+function getEffectiveFilterValue() {
+  return whFilterMode === 'advanced'
+    ? document.getElementById('whFilterAdvanced').value.trim()
+    : buildFilterFromRows();
+}
+
+// ── §TOOL::selfTestUri ────────────────────────────────────────────
+function useSelfTestUri() {
+  const { workerUrl } = getConfig();
+  if (!workerUrl) { showToast('حط الـ Worker URL في الإعدادات الأول', 'error'); return; }
+  document.getElementById('whUri').value = `${workerUrl.replace(/\/$/, '')}/test-receive`;
+  document.getElementById('whToolName').value = 'webhook_control';
+  showToast('اتحط رابط الاستقبال الذاتي — شوف تاب "🧪 تجربة الاستقبال" بعد ما يوصل أول event', 'success', 4500);
+}
+
 function openWebhookModal(mode, sub) {
   webhookModalMode = mode;
   webhookModalGid = sub?.id || null;
@@ -1158,11 +1351,23 @@ function openWebhookModal(mode, sub) {
   document.getElementById('whUri').value = sub?.uri || '';
   document.getElementById('whToolName').value = sub?.toolName || '';
   document.getElementById('whPurpose').value = sub?.purpose || '';
-  document.getElementById('whFilter').value = sub?.filter || '';
   document.getElementById('whMetafields').value = metafieldsToText(sub?.metafields);
   document.getElementById('whIncludeFields').value = includeFieldsToText(sub?.includeFields);
   document.getElementById('whNotes').value = sub?.notes || '';
   document.getElementById('whDeleteBtn').style.display = mode === 'edit' ? 'inline-flex' : 'none';
+
+  // filter mode: existing filter → advanced (no reliable reverse-parse into rows); empty → builder
+  if (sub?.filter) {
+    whFilterMode = 'advanced';
+    document.getElementById('whFilterAdvanced').value = sub.filter;
+  } else {
+    whFilterMode = 'builder';
+    document.getElementById('whFilterAdvanced').value = '';
+  }
+  filterRowsState = [{ field: '', op: ':', value: '', connector: 'AND' }];
+  renderFilterRows();
+  applyFilterModeUI();
+
   document.getElementById('webhookModalOverlay').classList.add('open');
 }
 function closeWebhookModal() { document.getElementById('webhookModalOverlay').classList.remove('open'); }
@@ -1172,7 +1377,7 @@ async function submitWebhookModal() {
   const uri = document.getElementById('whUri').value.trim();
   const toolName = document.getElementById('whToolName').value.trim();
   const purpose = document.getElementById('whPurpose').value.trim();
-  const filter = document.getElementById('whFilter').value.trim();
+  const filter = getEffectiveFilterValue();
   const metafields = parseMetafieldsInput(document.getElementById('whMetafields').value);
   const includeFields = parseIncludeFieldsInput(document.getElementById('whIncludeFields').value);
   const notes = document.getElementById('whNotes').value.trim();
@@ -1221,6 +1426,70 @@ function confirmDeleteWebhook() {
       loadManagement();
     } catch (err) {
       showToast(err.message || 'تعذّر الحذف', 'error');
+    }
+  });
+}
+
+// ── §TOOL::testReceived ───────────────────────────────────────
+let testReceivedCache = [];
+
+async function loadTestReceived() {
+  const wrap = document.getElementById('testList');
+  wrap.innerHTML = '<div class="log-empty"><div class="loading-spinner"></div></div>';
+  try {
+    const data = await apiGet('get_test_received', { limit: 50 });
+    renderTestReceived(data.entries || []);
+  } catch (err) {
+    wrap.innerHTML = `<div class="log-empty">⚠️ ${err.message}</div>`;
+  }
+}
+
+function renderTestReceived(entries) {
+  testReceivedCache = entries;
+  document.getElementById('testCount').textContent = entries.length.toLocaleString('en-US');
+  const wrap = document.getElementById('testList');
+  if (!entries.length) {
+    wrap.innerHTML = '<div class="log-empty">لسه ملوصلش أي webhook تجريبي — استخدم زرار "🧪 استقبال هنا" وقت الإنشاء، وابعت event حقيقي من شوبيفاي (مثلاً عدّل أوردر لو الـ topic كان ORDERS_UPDATED)</div>';
+    return;
+  }
+  wrap.innerHTML = entries.map((e, idx) => {
+    const validBadge = e.hmac_valid
+      ? '<span class="wh-badge wh-badge-ok">✅ HMAC صحيح</span>'
+      : '<span class="wh-badge wh-badge-danger">❌ HMAC غير صحيح</span>';
+    return `<div class="wh-card">
+      <div class="wh-card-top">
+        <span class="wh-badge wh-badge-topic">${e.topic}</span>
+        ${validBadge}
+      </div>
+      <div class="wh-meta">استلمناه: ${e.received_at ? formatDateTime(e.received_at) : '—'}</div>
+      ${e.webhook_id ? `<div class="wh-meta">Webhook ID: <code>${e.webhook_id}</code></div>` : ''}
+      ${e.shop_domain ? `<div class="wh-meta">المتجر: ${e.shop_domain}</div>` : ''}
+      <div class="wh-card-actions">
+        <button class="hbtn" onclick="viewPayload(${idx})">👁 عرض الـ Payload</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewPayload(idx) {
+  const e = testReceivedCache[idx];
+  if (!e) return;
+  document.getElementById('payloadModalTitle').textContent = `👁 ${e.topic} — ${e.received_at ? formatDateTime(e.received_at) : ''}`;
+  let pretty = e.payload_json;
+  try { pretty = JSON.stringify(JSON.parse(e.payload_json), null, 2); } catch { /* keep raw if not valid JSON */ }
+  document.getElementById('payloadModalBody').textContent = pretty;
+  document.getElementById('payloadModalOverlay').classList.add('open');
+}
+function closePayloadModal() { document.getElementById('payloadModalOverlay').classList.remove('open'); }
+
+function doClearTestReceived() {
+  showConfirm('مسح كل الـ webhooks التجريبية المستلمة؟ هذا لا يمكن التراجع عنه.', async () => {
+    try {
+      await apiPost('clear_test_received', {});
+      showToast('تم المسح ✓', 'success');
+      loadTestReceived();
+    } catch (err) {
+      showToast(err.message || 'تعذّر المسح', 'error');
     }
   });
 }
