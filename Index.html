@@ -325,7 +325,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="hbtn" id="refreshBtn" onclick="doRefresh()"><span class="ico">↺</span> تحديث</button>
       <button class="hbtn active-user" id="activeUserBtn" onclick="doLogout()">👤 —</button>
       <button class="hbtn" id="aboutBtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-      <button class="hbtn ver-btn" onclick="openChangelog()">v1.2.0 📋</button>
+      <button class="hbtn ver-btn" onclick="openChangelog()">v1.2.1 📋</button>
       <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     </div>
   </div>
@@ -523,7 +523,16 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
     <div class="eco-modal-body">
       <div class="cl-version-block">
         <div class="cl-version-row">
-          <span class="cl-ver-badge">v1.2.0</span>
+          <span class="cl-ver-badge">v1.2.1</span>
+          <span class="cl-ver-date">15-08-2026</span>
+        </div>
+        <ul class="cl-items">
+          <li class="cl-item"><span class="cl-tag fix">إصلاح</span><span>Metafield Enrichment مكانش بيشتغل خالص — <code>/test-receive</code> كان بيقارن الـ topic القادم من هيدر شوبيفاي (صيغة REST زي <code>products/update</code>) مع الـ topic المسجّل محلياً (صيغة GraphQL زي <code>PRODUCTS_UPDATE</code>) من غير تحويل بينهم، فالمقارنة مكانتش بتتطابق أبداً ولا حصل أي enrichment. اتضاف تحويل صيغة قبل المقارنة.</span></li>
+        </ul>
+      </div>
+      <div class="cl-version-block">
+        <div class="cl-version-row">
+          <span class="cl-ver-badge old">v1.2.0</span>
           <span class="cl-ver-date">15-08-2026</span>
         </div>
         <ul class="cl-items">
