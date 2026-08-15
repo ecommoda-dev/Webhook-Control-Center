@@ -235,6 +235,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 .field-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
 .field-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
 .field-hint { font-size: 10px; color: var(--text-muted); }
+.field-hint code { font-family: var(--font-mono); direction: ltr; display: inline-block; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
 .field-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .field-row > .field-group { flex: 1; min-width: 200px; }
 
@@ -285,6 +286,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 .wh-filter-preview { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
 .wh-filter-preview code { font-family: var(--font-mono); direction: ltr; display: inline-block; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; margin-inline-start: 4px; word-break: break-all; }
 .field-toggle-btn { padding: 3px 9px; font-size: 10px; }
+.wh-checkbox-row { display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 0; }
+.wh-checkbox-row label { display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: var(--font-mono); direction: ltr; cursor: pointer; }
+.wh-checkbox-row input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
 
 /* ── Payload viewer / test-received list ─────────────────────── */
 .about-pre { font-family: var(--font-mono); font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; overflow-x: auto; white-space: pre; direction: ltr; text-align: left; line-height: 1.65; margin: 0; }
@@ -311,7 +315,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
        ══════════════════════════════════════════════════════════════ -->
   <div class="app-header">
     <div class="app-title">
-      <div class="app-icon">🪝</div>
+      <div class="app-icon">🔗</div>
       <div class="app-title-text">
         <h1>Webhook Control Center</h1>
         <span>إدارة ومراقبة Custom Webhooks شوبيفاي لكل أدوات المتجر</span>
@@ -321,14 +325,14 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="hbtn" id="refreshBtn" onclick="doRefresh()"><span class="ico">↺</span> تحديث</button>
       <button class="hbtn active-user" id="activeUserBtn" onclick="doLogout()">👤 —</button>
       <button class="hbtn" id="aboutBtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-      <button class="hbtn ver-btn" onclick="openChangelog()">v1.1.0 📋</button>
+      <button class="hbtn ver-btn" onclick="openChangelog()">v1.2.0 📋</button>
       <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     </div>
   </div>
 
   <!-- Main Tabs -->
   <div class="main-tabs-bar">
-    <button class="main-tab-btn active" id="mainTab_manage"  onclick="switchMainTab('manage')">🪝 إدارة الويبهوكس</button>
+    <button class="main-tab-btn active" id="mainTab_manage"  onclick="switchMainTab('manage')">🔗 إدارة الويبهوكس</button>
     <button class="main-tab-btn"        id="mainTab_monitor" onclick="switchMainTab('monitor')">📡 المراقبة</button>
     <button class="main-tab-btn"        id="mainTab_test"    onclick="switchMainTab('test')">🧪 تجربة الاستقبال</button>
     <button class="main-tab-btn"        id="mainTab_log"     onclick="switchMainTab('log')">📜 سجل العمليات</button>
@@ -434,7 +438,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
   <div class="login-card">
     <button class="login-settings-btn missing" id="loginSettingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     <div class="login-top">
-      <div class="login-icon">🪝</div>
+      <div class="login-icon">🔗</div>
       <div class="login-title">Webhook Control Center</div>
       <div class="login-desc">إدارة ومراقبة Custom Webhooks شوبيفاي</div>
       <div class="login-sub" id="loginSub">اختر اسمك للمتابعة</div>
@@ -519,7 +523,20 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
     <div class="eco-modal-body">
       <div class="cl-version-block">
         <div class="cl-version-row">
-          <span class="cl-ver-badge">v1.1.0</span>
+          <span class="cl-ver-badge">v1.2.0</span>
+          <span class="cl-ver-date">15-08-2026</span>
+        </div>
+        <ul class="cl-items">
+          <li class="cl-item"><span class="cl-tag fix">إصلاح</span><span>زرار "🔄 تحديث" فوق كان مش شغال على تاب "تجربة الاستقبال" — دلوقتي بيحدّث فعلياً، وتاب الاستقبال بقى يحمّل بيانات جديدة كل مرة تدخله (مش مرة واحدة بس لكل جلسة)</span></li>
+          <li class="cl-item"><span class="cl-tag fix">إصلاح</span><span>الأيقونة 🪝 كانت مش ظاهرة على بعض الأجهزة (رمز يونيكود جديد نسبياً) — اتغيّرت لـ 🔗 في كل مكان بالأداة</span></li>
+          <li class="cl-item"><span class="cl-tag change">تغيير</span><span>METAFIELDS بقى بصيغة <code>namespace.key</code> (نقطة) بدل <code>namespace:key</code> (نقطتين) — يطابق الصيغة المستخدمة في باقي الأدوات — مع تحذير واضح ووقف الحفظ لو أي سطر متكتبش صح، بدل ما يتجاهل بصمت</span></li>
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>ملحوظة توضيحية جنب INCLUDE FIELDS عن الـ dot notation للحقول المتداخلة (<code>variants.sku</code>) وعن الكلمة <code>metafields</code> المطلوبة لإظهار الميتافيلدز في الـ payload</span></li>
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>Metafield Enrichment — لما تستخدم "🧪 استقبال هنا"، الأداة بتعمل query مباشر لشوبيفاي بعد كل استقبال وتجيب قيم METAFIELDS بشكل موثوق (بديل عن الاعتماد على وصولها جوه الـ payload، اللي مش ثابت خصوصاً لمتافيلدز الـ variant) — مع تحكم كامل في أنهي حقول الميتافيلد تتجاب (namespace/key/value/type/description/id/createdAt/updatedAt)، وعرضها في تاب "🧪 تجربة الاستقبال" جنب الـ payload الخام</span></li>
+        </ul>
+      </div>
+      <div class="cl-version-block">
+        <div class="cl-version-row">
+          <span class="cl-ver-badge old">v1.1.0</span>
           <span class="cl-ver-date">15-08-2026</span>
         </div>
         <ul class="cl-items">
@@ -579,8 +596,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <tr><td><code>get_monitoring_summary</code></td><td>تجميع من جدول logs المشترك — آخر نشاط + فشل آخر 24 ساعة لكل tool_name</td></tr>
             <tr><td><code>get_topics_reference</code></td><td>قائمة مرجعية لأشهر topics (مش كل القائمة — أي اسم تاني يتقبل ويتحقق منه شوبيفاي نفسه)</td></tr>
             <tr><td><code>get_known_tool_names</code></td><td>قيم tool المميزة من جدول logs + اسم الأداة نفسها — بتغذي datalist حقل "اسم الأداة المستهدفة"</td></tr>
-            <tr><td><code>get_test_received</code> / <code>clear_test_received</code></td><td>عرض/مسح آخر 50 webhook وصلوا على <code>/test-receive</code></td></tr>
-            <tr><td><code>POST /test-receive</code> (مش action، path منفصل)</td><td>الـ route اللي بيستقبل webhooks حقيقية من شوبيفاي للتجربة — HMAC بـ CLIENT_SECRET، من غير login</td></tr>
+            <tr><td><code>get_test_received</code> / <code>clear_test_received</code></td><td>عرض/مسح آخر 50 webhook وصلوا على <code>/test-receive</code> — يشمل نتيجة الـ metafield enrichment لو مفعّلة</td></tr>
+            <tr><td><code>POST /test-receive</code> (مش action، path منفصل)</td><td>الـ route اللي بيستقبل webhooks حقيقية من شوبيفاي للتجربة — HMAC بـ CLIENT_SECRET، من غير login، وبيعمل query مباشر لجيب METAFIELDS لو مسجّلة على نفس الـ subscription</td></tr>
           </table>
         </div>
       </details>
@@ -593,8 +610,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li><code>§AUTH</code> — Universal D1 Auth (check_employee / register_pin / verify_employee / log_logout / get_employees)</li>
             <li><code>§WEBHOOKS</code> (Worker) — كل منطق الإدارة والـ reconcile والمراقبة + get_known_tool_names</li>
             <li><code>§TEST-RECEIVE</code> (Worker) — <code>handleTestReceive</code> (route <code>/test-receive</code>، بره الـ WORKER_SECRET gate) + get_test_received / clear_test_received</li>
+            <li><code>§SHOPIFY::metafieldEnrichment</code> — <code>fetchMetafieldEnrichment</code> + <code>METAFIELD_FETCHABLE_FIELDS</code> allow-list — query مباشر لـ Product/ProductVariant نودز بعد كل استقبال ناجح</li>
             <li><code>§HELPERS::safeEqual / verifyShopifyHmac</code> — نفس نمط webhook-receivers.md، بس بـ CLIENT_SECRET بدل SHOPIFY_WEBHOOK_SECRET (لأن كل subscriptions الأداة دي API-registered)</li>
-            <li><code>§TOOL-JS</code> (HTML) — Management tab + Monitoring tab + Test Receiver tab + Webhook form modal + Filter Builder</li>
+            <li><code>§TOOL-JS</code> (HTML) — Management tab + Monitoring tab + Test Receiver tab + Webhook form modal + Filter Builder + Metafield Fetch Fields picker</li>
             <li><code>§LOG-ENDPOINTS</code> — get_logs / get_logs_count / get_logs_export (نمط v2 — pagination 100/صفحة)</li>
           </ul>
 
@@ -603,9 +621,10 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li><code>currentEmployee</code> — {username, displayName} في الذاكرة فقط (لا localStorage)</li>
             <li><code>LS_URL = 'webhook_control_worker_url'</code> · <code>LS_SECRET = 'webhook_control_worker_secret'</code></li>
             <li><code>TOOL_NAME = 'webhook_control'</code> — قيمة tool في جدول logs</li>
-            <li><code>webhook_registry</code> — جدول D1 (مش من الـ schema الأساسي) — بيربط subscription_gid بمعلومات محلية (tool_name/purpose/notes) مش موجودة في شوبيفاي أصلاً</li>
-            <li><code>test_received_webhooks</code> — جدول D1 تاني، بيخزّن كل payload وصل على <code>/test-receive</code> (خام، JSON نصي)</li>
+            <li><code>webhook_registry</code> — جدول D1 (مش من الـ schema الأساسي) — بيربط subscription_gid بمعلومات محلية (tool_name/purpose/notes/metafield_fetch_fields) مش موجودة في شوبيفاي أصلاً</li>
+            <li><code>test_received_webhooks</code> — جدول D1 تاني، بيخزّن كل payload وصل على <code>/test-receive</code> (خام، JSON نصي) + نتيجة الـ enrichment لو حصلت</li>
             <li><code>filterRowsState</code> (HTML) — حالة الـ Filter Builder الحالية في الذاكرة، بتتحول لصيغة شوبيفاي عن طريق <code>buildFilterFromRows()</code></li>
+            <li><code>METAFIELD_FETCHABLE_FIELDS</code> (Worker) — allow-list مؤكدة من توثيق شوبيفاي (id/namespace/key/value/type/description/createdAt/updatedAt) — مفيش حقل بيتمرر من D1 للـ query من غير ما يتفلتر عليها الأول</li>
           </ul>
 
           <h4>NOTES</h4>
@@ -615,6 +634,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li>حقل "اسم الأداة" وقت الإنشاء بقى datalist من <code>get_known_tool_names</code> — بس لسه ممكن تكتب اسم جديد مش موجود لسه (لأداة لسه ما اتبنتش)، القائمة اقتراح مش قفل.</li>
             <li>Filter Builder ببناء شروط متتالية (AND/OR) بس — من غير تجميع بالأقواس. أي حالة محتاجة أقواس (زي <code>status:active AND (product_type:Music OR product_type:Movies)</code>) لازم "وضع متقدم (نص حر)".</li>
             <li>INCLUDE FIELDS لسه نص حر (سطر أو فاصلة لكل حقل) — القيم المتاحة بتختلف حسب الـ topic ومفيش API من شوبيفاي بيرجّعها، فمفيش dropdown ليها حالياً.</li>
+            <li>METAFIELDS بقى بصيغة <code>namespace.key</code> (نقطة) — سطر مكتوب غلط بيوقف الحفظ بتحذير واضح، بدل ما يتسجل بصمت كمصفوفة فاضية زي قبل كده.</li>
+            <li>⚠️ Metafield Enrichment (query مباشر) بيشتغل بس على subscriptions الـ URI بتاعتها هو <code>/test-receive</code> بتاع نفس الأداة — مش أي webhook تاني. الحقول اللي بتتجاب محدّدة عن طريق checkboxes في فورم الإنشاء/التعديل (افتراضي: namespace + key + value). العملية best-effort — أي فشل فيها (مثلاً الـ metafield مش موجود على المورد ده) بيتسجل كـ <code>{namespace, key, found:false}</code> بدل ما يوقف حفظ الـ payload الخام.</li>
             <li>⚠️ <code>/test-receive</code> بيتحقق بـ HMAC مش WORKER_SECRET — أي حد يعرف الرابط ده وعنده CLIENT_SECRET الصحيح (يعني بس شوبيفاي فعلياً) يقدر يبعتله. البيانات المستلمة بتتخزن خام كما هي في D1، فلو فيها بيانات عميل حساسة، متنساش تمسحها بزرار "🗑 مسح الكل" بعد التجربة.</li>
             <li>Log tab بيستخدم نمط v2 (pagination من السيرفر، 100 صف/صفحة) بدل التحميل الكامل + فلترة client-side القديمة.</li>
           </ul>
@@ -680,12 +701,27 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <div class="field-row">
         <div class="field-group">
           <span class="field-label">METAFIELDS (اختياري)</span>
-          <textarea class="field-textarea" id="whMetafields" placeholder="namespace:key — سطر لكل عنصر&#10;مثال: custom:manual_status"></textarea>
+          <textarea class="field-textarea" id="whMetafields" placeholder="namespace.key — سطر لكل عنصر&#10;مثال: custom.manual_status"></textarea>
         </div>
         <div class="field-group">
           <span class="field-label">INCLUDE FIELDS (اختياري)</span>
           <textarea class="field-textarea" id="whIncludeFields" placeholder="اسم حقل — سطر أو فاصلة لكل عنصر&#10;مثال: id, line_items.sku, updated_at"></textarea>
+          <span class="field-hint">حقول جوّه مصفوفة (زي variants) لازم تتكتب بنقطة: <code>variants.sku</code>، <code>variants.price</code> — مش <code>sku</code> لوحدها، وإلا شوبيفاي بيتجاهلها بصمت. عايز الـ METAFIELDS تظهر في الـ payload؟ ضيف كلمة <code>metafields</code> لوحدها هنا (من غير أي إضافة بعدها).</span>
         </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">حقول METAFIELDS في الـ Query المباشر (اختياري)</span>
+        <div class="wh-checkbox-row" id="whMetafieldFetchFields">
+          <label><input type="checkbox" value="namespace" checked> namespace</label>
+          <label><input type="checkbox" value="key" checked> key</label>
+          <label><input type="checkbox" value="value" checked> value</label>
+          <label><input type="checkbox" value="type"> type</label>
+          <label><input type="checkbox" value="description"> description</label>
+          <label><input type="checkbox" value="id"> id</label>
+          <label><input type="checkbox" value="createdAt"> createdAt</label>
+          <label><input type="checkbox" value="updatedAt"> updatedAt</label>
+        </div>
+        <span class="field-hint">بيتفعّل بس لو الـ URI هو رابط "🧪 استقبال هنا" — بدل ما نعتمد على وصول الـ metafields جوه الـ payload (مش ثابت خصوصاً لمتافيلدز الـ variant)، الأداة بتعمل query مباشر لشوبيفاي بعد الاستقبال وتجيب بس الحقول المحدّدة هنا. الافتراضي: namespace + key + value.</span>
       </div>
       <div class="field-group">
         <span class="field-label">ملاحظات</span>
@@ -710,6 +746,10 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="modal-close-x" onclick="closePayloadModal()">✕</button>
     </div>
     <div class="eco-modal-body">
+      <div id="payloadModalEnriched" style="display:none;margin-bottom:14px;">
+        <div class="wh-section-title" style="margin-top:0;">🔎 Metafields (query مباشر — مش من الـ payload)</div>
+        <pre class="about-pre"></pre>
+      </div>
       <pre class="about-pre" id="payloadModalBody"></pre>
     </div>
   </div>
@@ -840,6 +880,7 @@ async function doRefresh() {
   try {
     if (currentMainTab === 'manage')       await loadManagement();
     else if (currentMainTab === 'monitor') await loadMonitoring();
+    else if (currentMainTab === 'test')    await loadTestReceived();
     else if (currentMainTab === 'log')     await loadLog(false);
   } finally { setRefreshing(false); }
 }
@@ -1126,7 +1167,6 @@ function updateLoginSettingsBtnState() {
 const MAIN_TABS = ['manage', 'monitor', 'test', 'log'];
 let currentMainTab = 'manage';
 let manageLoaded = false;
-let testLoaded = false;
 let logLoaded = false;
 
 function switchMainTab(tab) {
@@ -1137,7 +1177,7 @@ function switchMainTab(tab) {
   });
   if (tab === 'manage' && !manageLoaded) { manageLoaded = true; loadManagement(); }
   if (tab === 'monitor') loadMonitoring();
-  if (tab === 'test' && !testLoaded) { testLoaded = true; loadTestReceived(); }
+  if (tab === 'test') loadTestReceived();
   if (tab === 'log' && !logLoaded) loadLog(true);
 }
 
@@ -1236,13 +1276,28 @@ function renderUntracked(list) {
 let webhookModalMode = 'create';
 let webhookModalGid = null;
 
-function metafieldsToText(arr) { return (arr || []).map(m => `${m.namespace}:${m.key}`).join('\n'); }
+function metafieldsToText(arr) { return (arr || []).map(m => `${m.namespace}.${m.key}`).join('\n'); }
 function includeFieldsToText(arr) { return (arr || []).join(', '); }
 function parseMetafieldsInput(text) {
-  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
-    const parts = l.split(':').map(s => s.trim());
-    return (parts[0] && parts[1]) ? { namespace: parts[0], key: parts[1] } : null;
-  }).filter(Boolean);
+  const metafields = [];
+  const errors = [];
+  text.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+    const dotIdx = line.indexOf('.');
+    const namespace = dotIdx > -1 ? line.slice(0, dotIdx).trim() : '';
+    const key       = dotIdx > -1 ? line.slice(dotIdx + 1).trim() : '';
+    if (namespace && key) metafields.push({ namespace, key });
+    else errors.push(line);
+  });
+  return { metafields, errors };
+}
+function getSelectedMetafieldFetchFields() {
+  return [...document.querySelectorAll('#whMetafieldFetchFields input[type=checkbox]:checked')].map(cb => cb.value);
+}
+function setMetafieldFetchFields(fields) {
+  const active = new Set(fields && fields.length ? fields : ['namespace', 'key', 'value']);
+  document.querySelectorAll('#whMetafieldFetchFields input[type=checkbox]').forEach(cb => {
+    cb.checked = active.has(cb.value);
+  });
 }
 function parseIncludeFieldsInput(text) {
   return text.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
@@ -1353,6 +1408,7 @@ function openWebhookModal(mode, sub) {
   document.getElementById('whPurpose').value = sub?.purpose || '';
   document.getElementById('whMetafields').value = metafieldsToText(sub?.metafields);
   document.getElementById('whIncludeFields').value = includeFieldsToText(sub?.includeFields);
+  setMetafieldFetchFields(sub?.metafieldFetchFields);
   document.getElementById('whNotes').value = sub?.notes || '';
   document.getElementById('whDeleteBtn').style.display = mode === 'edit' ? 'inline-flex' : 'none';
 
@@ -1378,12 +1434,17 @@ async function submitWebhookModal() {
   const toolName = document.getElementById('whToolName').value.trim();
   const purpose = document.getElementById('whPurpose').value.trim();
   const filter = getEffectiveFilterValue();
-  const metafields = parseMetafieldsInput(document.getElementById('whMetafields').value);
+  const { metafields, errors: metafieldErrors } = parseMetafieldsInput(document.getElementById('whMetafields').value);
   const includeFields = parseIncludeFieldsInput(document.getElementById('whIncludeFields').value);
+  const metafieldFetchFields = getSelectedMetafieldFetchFields();
   const notes = document.getElementById('whNotes').value.trim();
 
   if (!uri) { showToast('الـ URI مطلوب', 'error'); return; }
   if (webhookModalMode === 'create' && !topic) { showToast('الـ topic مطلوب', 'error'); return; }
+  if (metafieldErrors.length) {
+    showToast(`تعذّر فهم سطر في METAFIELDS: "${metafieldErrors[0]}" — لازم يكون بالصيغة namespace.key`, 'error', 6000);
+    return;
+  }
 
   const btn = document.getElementById('whSaveBtn');
   btn.disabled = true; btn.textContent = 'جارٍ الحفظ...';
@@ -1392,6 +1453,7 @@ async function submitWebhookModal() {
       await apiPost('create_subscription', {
         topic, uri,
         metafields: metafields.length ? metafields : undefined,
+        metafieldFetchFields,
         filter: filter || undefined,
         includeFields: includeFields.length ? includeFields : undefined,
         toolName, purpose, notes,
@@ -1401,7 +1463,7 @@ async function submitWebhookModal() {
     } else {
       await apiPost('update_subscription', {
         subscriptionGid: webhookModalGid,
-        uri, filter, includeFields, metafields,
+        uri, filter, includeFields, metafields, metafieldFetchFields,
         toolName, purpose, notes,
         employee: currentEmployee?.username,
       });
@@ -1456,10 +1518,14 @@ function renderTestReceived(entries) {
     const validBadge = e.hmac_valid
       ? '<span class="wh-badge wh-badge-ok">✅ HMAC صحيح</span>'
       : '<span class="wh-badge wh-badge-danger">❌ HMAC غير صحيح</span>';
+    const enrichedBadge = e.enriched_metafields_json
+      ? '<span class="wh-badge wh-badge-tool">🔎 metafields (query مباشر)</span>'
+      : '';
     return `<div class="wh-card">
       <div class="wh-card-top">
         <span class="wh-badge wh-badge-topic">${e.topic}</span>
         ${validBadge}
+        ${enrichedBadge}
       </div>
       <div class="wh-meta">استلمناه: ${e.received_at ? formatDateTime(e.received_at) : '—'}</div>
       ${e.webhook_id ? `<div class="wh-meta">Webhook ID: <code>${e.webhook_id}</code></div>` : ''}
@@ -1475,8 +1541,20 @@ function viewPayload(idx) {
   const e = testReceivedCache[idx];
   if (!e) return;
   document.getElementById('payloadModalTitle').textContent = `👁 ${e.topic} — ${e.received_at ? formatDateTime(e.received_at) : ''}`;
+
   let pretty = e.payload_json;
   try { pretty = JSON.stringify(JSON.parse(e.payload_json), null, 2); } catch { /* keep raw if not valid JSON */ }
+
+  const enrichedBlock = document.getElementById('payloadModalEnriched');
+  if (e.enriched_metafields_json) {
+    let enrichedPretty = e.enriched_metafields_json;
+    try { enrichedPretty = JSON.stringify(JSON.parse(e.enriched_metafields_json), null, 2); } catch {}
+    enrichedBlock.style.display = 'block';
+    enrichedBlock.querySelector('pre').textContent = enrichedPretty;
+  } else {
+    enrichedBlock.style.display = 'none';
+  }
+
   document.getElementById('payloadModalBody').textContent = pretty;
   document.getElementById('payloadModalOverlay').classList.add('open');
 }
