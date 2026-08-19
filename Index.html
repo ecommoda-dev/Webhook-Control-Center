@@ -628,8 +628,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
           <h4>KEY VARIABLES</h4>
           <ul>
             <li><code>currentEmployee</code> — {username, displayName} في الذاكرة فقط (لا localStorage)</li>
-            <li><code>LS_URL = 'webhook_control_worker_url'</code> · <code>LS_SECRET = 'webhook_control_worker_secret'</code></li>
-            <li><code>TOOL_NAME = 'webhook_control'</code> — قيمة tool في جدول logs</li>
+            <li><code>LS_URL = 'webhook_control_center_worker_url'</code> · <code>LS_SECRET = 'webhook_control_center_worker_secret'</code></li>
+            <li><code>TOOL_NAME = 'webhook_control_center'</code> — قيمة tool في جدول logs</li>
             <li><code>webhook_registry</code> — جدول D1 (مش من الـ schema الأساسي) — بيربط subscription_gid بمعلومات محلية (tool_name/purpose/notes/metafield_fetch_fields) مش موجودة في شوبيفاي أصلاً</li>
             <li><code>test_received_webhooks</code> — جدول D1 تاني، بيخزّن كل payload وصل على <code>/test-receive</code> (خام، JSON نصي) + نتيجة الـ enrichment لو حصلت</li>
             <li><code>filterRowsState</code> (HTML) — حالة الـ Filter Builder الحالية في الذاكرة، بتتحول لصيغة شوبيفاي عن طريق <code>buildFilterFromRows()</code></li>
@@ -683,7 +683,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
           <span class="field-label">اسم الأداة المستهدفة</span>
           <input type="text" class="field-input" id="whToolName" list="toolNamesDatalist" />
           <datalist id="toolNamesDatalist"></datalist>
-          <span class="field-hint">لازم يطابق TOOL_NAME بتاع الـ Worker المستقبِل عشان تاب المراقبة يشتغل صح — دوّس "🧪 استقبال هنا" واختار اسم الأداة الحالية (webhook_control) لو بتجرّب بس</span>
+          <span class="field-hint">لازم يطابق TOOL_NAME بتاع الـ Worker المستقبِل عشان تاب المراقبة يشتغل صح — دوّس "🧪 استقبال هنا" واختار اسم الأداة الحالية (webhook_control_center) لو بتجرّب بس</span>
         </div>
         <div class="field-group">
           <span class="field-label">الغرض</span>
@@ -789,8 +789,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
      ══════════════════════════════════════════════════════════════ -->
 <script>
 // ── §CONFIG ──────────────────────────────────────────────────
-const LS_URL       = 'webhook_control_worker_url';
-const LS_SECRET    = 'webhook_control_worker_secret';
+const LS_URL       = 'webhook_control_center_worker_url';
+const LS_SECRET    = 'webhook_control_center_worker_secret';
 const LS_ADMIN_URL = 'admin_worker_url';
 
 function getConfig() {
@@ -1401,7 +1401,7 @@ function useSelfTestUri() {
   const { workerUrl } = getConfig();
   if (!workerUrl) { showToast('حط الـ Worker URL في الإعدادات الأول', 'error'); return; }
   document.getElementById('whUri').value = `${workerUrl.replace(/\/$/, '')}/test-receive`;
-  document.getElementById('whToolName').value = 'webhook_control';
+  document.getElementById('whToolName').value = 'webhook_control_center';
   showToast('اتحط رابط الاستقبال الذاتي — شوف تاب "🧪 تجربة الاستقبال" بعد ما يوصل أول event', 'success', 4500);
 }
 
