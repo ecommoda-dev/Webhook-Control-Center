@@ -13,3 +13,5 @@ database_id   = "90db62d3-bd7e-4d92-912b-10fc78eeb565"
 
 [vars]
 SHOP_DOMAIN = "6c7e1a-53.myshopify.com"
+
+# build-watch-paths probe — بيتشال في الcommit اللي بعده
