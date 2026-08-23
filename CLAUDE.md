@@ -36,7 +36,7 @@ tool  : webhook_control_center
 type  : create · update · delete · pause · resume · reconcile · login · logout
 ```
 
-> ⚠️ القيم دي **لسه مش مسجّلة** في جدول D1 في `ecommoda-constants` §7 — بند مفتوح تحت.
+> القيم دي مسجّلة في جدول D1 في `ecommoda-constants` §7.
 
 ## D1 إضافية (جدولين زيادة عن الـ logs المشترك)
 
@@ -99,7 +99,14 @@ Vars     : SHOP_DOMAIN     ← من [vars] في wrangler.toml
 git show e659be3:1.2.1.html
 ```
 
+## ⚠️ Build watch paths مضيّقة
+
+الـ Include paths في Cloudflare متضبّطة على **`index.js` و `wrangler.toml` بس** (مش `*`) — اتجرّبت واتأكدت في الاتجاهين 23-08-2026، والنتيجة اتوثّقت في `ecommoda-tool-migration-playbook` §13-ب.
+
+يعني **تعديل الواجهة لوحده مش بيشغّل نشر للـ Worker** — وده مقصود.
+
+> 🔴 **لو الأداة كبرت وضافت أي ملف جديد بيعتمد عليه الـ Worker** (`package.json`، فولدر `src/`، أي config) — **لازم يتضاف للـ Include paths في الداشبورد**، وإلا الـ Worker هيفضل على نسخة قديمة **من غير أي رسالة خطأ**.
+
 ## مسائل مفتوحة
 
-- `tool = webhook_control_center` وقيم الـ `type` بتاعتها **مش مسجّلة** في `ecommoda-constants` §7 — لازم تتضاف هناك
-- **Build watch paths متضبّطة على `index.js` و `wrangler.toml` بس** (مش `*`) — تجربة للبند المفتوح في `ecommoda-tool-migration-playbook` §13-ب. يعني تعديل الواجهة لوحده **مش** بيشغّل build للـ Worker. لو الأداة كبرت وضافت ملفات جديدة بيعتمد عليها الـ Worker (`package.json` مثلًا)، **لازم تتضاف للـ paths** وإلا الـ Worker هيفضل على نسخة قديمة من غير أي رسالة.
+- (مفيش)
