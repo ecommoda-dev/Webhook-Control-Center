@@ -6,8 +6,10 @@
 
 | القطعة | المكان |
 |---|---|
-| الواجهة | GitHub Pages — `Index.html` |
+| الواجهة | GitHub Pages — `index.html` |
 | الـ Worker | Cloudflare — `webhook-control-center-worker` (`index.js` + `wrangler.toml`) |
+
+`Index.html` (بحرف كبير) صفحة تحويل للروابط القديمة بس.
 
 القطعتين بينشروا أوتوماتيك من `main`. الـ Worker بياخد ثواني، الـ Pages بتاخد أطول — طبيعي تلاقي نافذة زمنية القطعتين فيها مش متطابقين.
 

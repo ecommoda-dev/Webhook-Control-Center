@@ -72,6 +72,15 @@ Vars     : SHOP_DOMAIN     ← من [vars] في wrangler.toml
 
 `ALLOWED_ORIGINS` صارمة (`https://ecommoda-dev.github.io` بس) — لأن الأداة **أداة كتابة**: بتنشئ وتمسح اشتراكات ويبهوك حية على شوبيفاي.
 
+## خط الأساس بعد النقل
+
+> الأرقام اللي الأداة رجّعتها بعد ما اتأكدنا إنها شغالة من صفحة الواجهة — مرجع لأي شك بعد كده.
+
+```
+٢ اشتراكات نشطة  (stylebox_price_sync / PRODUCTS_UPDATE · manual_order_creation / DRAFT_ORDERS_CREATE)
+الواجهة v1.3.0 · الـ Worker v1.3.0 · 23-08-2026
+```
+
 ## فخاخ الأداة دي
 
 - **راوت `/test-receive` لازم يفضل أول حاجة في الـ handler — قبل بوابة `WORKER_SECRET` بالظبط.** شوبيفاي مش بيبعت `Authorization` header، فلو الترتيب اتغيّر كل تسليمة هترجع 401 قبل ما الـ HMAC يتفحص أصلاً.
@@ -79,19 +88,18 @@ Vars     : SHOP_DOMAIN     ← من [vars] في wrangler.toml
 - **مفيش pause أصلي في شوبيفاي:** "الإيقاف المؤقت" هنا = حذف حقيقي للاشتراك مع الاحتفاظ بإعداداته في `webhook_registry` بحالة `paused`، والاستئناف بيعمل اشتراك جديد بـ `subscription_gid` جديد بيتحدّث في نفس الصف.
 - **صيغة الـ topic بتختلف:** الهيدر `X-Shopify-Topic` بييجي REST (`products/update`) بينما `webhook_registry.topic` مخزّن GraphQL enum (`PRODUCTS_UPDATE`). `restTopicToGraphQLTopic` هي اللي بتوصّلهم — من غيرها الـ enrichment مش بيشتغل **من غير أي رسالة خطأ**.
 - **`/test-receive` مبيرجعش 500 أبدًا** بعد ما الـ HMAC يعدّي — أي فشل بعد كده بيتبلع والرد 200، لأن تكرار الردود غير الـ 2xx بيخلي شوبيفاي يمسح الاشتراك بصمت.
-- **الرابط المختصر `https://ecommoda-dev.github.io/Webhook-Control-Center/` بيرجع 404** لأن ملف الواجهة اسمه `Index.html` بحرف كبير، وGitHub Pages بيدوّر على `index.html` صغيّرة. **بند مفتوح لحد الـ PR التاني** (§4-ح في `ecommoda-tool-migration-playbook`).
+- **حساسية الحروف في GitHub Pages:** الرابط المختصر كان بيرجع **404** لأن الملف كان اسمه `Index.html` بحرف كبير، وPages بيدوّر على `index.html` صغيّرة كملف افتراضي للمجلد. **اتحل** — الملف بقى `index.html`، و`Index.html` بقى صفحة تحويل. متسمّيش أي ملف واجهة بحرف كبير تاني.
 
 ## استرجاع النسخ القديمة
 
 > ده بديل الـ tags — دفع الـ tags ممنوع من جلسات Claude Code السحابية.
 
 ```
-النسخ المرقّمة القديمة لسه في جذر الريبو (1.2.1.html) — هتتشال في الـ PR التاني
-وقتها يتسجّل رقم الـ commit هنا.
+آخر commit فيه النسخ المرقّمة القديمة: e659be3
+git show e659be3:1.2.1.html
 ```
 
 ## مسائل مفتوحة
 
-- الواجهة لسه ما اتنضفتش: `Index.html` → `index.html` + صفحة تحويل + مسح `1.2.1.html` → **PR التاني**
 - `tool = webhook_control_center` وقيم الـ `type` بتاعتها **مش مسجّلة** في `ecommoda-constants` §7 — لازم تتضاف هناك
-- الربط في Cloudflare (Workers Builds) لسه ما اتعملش — بعد الدمج: Settings → Build → Connect، وبعدها commit جديد على `main` عشان أول build يشتغل (الفخ الخامس)
+- **Build watch paths متضبّطة على `index.js` و `wrangler.toml` بس** (مش `*`) — تجربة للبند المفتوح في `ecommoda-tool-migration-playbook` §13-ب. يعني تعديل الواجهة لوحده **مش** بيشغّل build للـ Worker. لو الأداة كبرت وضافت ملفات جديدة بيعتمد عليها الـ Worker (`package.json` مثلًا)، **لازم تتضاف للـ paths** وإلا الـ Worker هيفضل على نسخة قديمة من غير أي رسالة.

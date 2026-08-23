@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Webhook Control Center — EcomModa</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <style>
 /* ══════════════════════════════════════════════════════════════
@@ -38,8 +37,8 @@
   --radius-sm:      8px;
   --shadow:         0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
   --font-body:      'Noto Sans Arabic', -apple-system, sans-serif;
-  --font-mono:      'IBM Plex Mono', monospace;
-  --container-max:  1040px;
+  --font-mono:      var(--font-body); /* UI Standard v2 #16 — single font; var kept for old classes (.order-link, .col-num...) */
+  --container-max:  1200px; /* Tier M — tool has a Log Tab, can never stay Tier S (UI Standard v2 #26) */
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-body); background: var(--bg); color: var(--text-primary); min-height: 100vh; padding: 12px; direction: rtl; }
@@ -144,6 +143,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 .login-settings-btn.ready   { border-color: var(--green); color: var(--green); background: var(--green-light); }
 .login-settings-btn.missing { border-color: var(--red); color: var(--red); background: var(--red-light); }
 .login-settings-btn:hover   { transform: translateY(-1px); }
+.login-version { position: absolute; top: 58px; left: 17px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: .2px; user-select: none; }
 .login-top { padding-top: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .login-icon  { font-size: 34px; line-height: 1; margin-bottom: 14px; }
 .login-title { font-size: 19px; font-weight: 900; letter-spacing: -.1px; }
@@ -190,35 +190,97 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 .login-secondary.visible { display: inline-flex; }
 .login-secondary:hover   { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
 
-/* ── Log Tab ──────────────────────────────────────────────────  */
-.log-tab-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-.log-filters-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
+/* ── Log Tab — Unified Section (data-table-standard.md) ─────── */
+.unified-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
+.section-divider { border-top: 1px solid var(--border); }
+
+.flt-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface-2); cursor: pointer; user-select: none; transition: background .12s; border-radius: var(--radius) var(--radius) 0 0; }
+.flt-header:hover { background: #f0f4f8; }
+.flt-header-right { display: flex; align-items: center; gap: 10px; }
+.flt-icon { width: 34px; height: 22.5px; color: var(--text-muted); transition: color .2s; flex-shrink: 0; }
+.flt-icon.active { color: var(--accent); }
+.flt-toggle { font-size: 13px; color: var(--text-muted); transition: transform .25s; }
+.flt-toggle.open { transform: rotate(180deg); }
+.flt-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.flt-body.collapsed { display: none; }
+.clear-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius-sm); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; height: 34px; border: 1px solid var(--red-border); color: var(--red); background: var(--red-light); }
+.clear-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.clear-btn.inactive { border-color: var(--border); color: var(--text-muted); background: var(--surface-2); cursor: not-allowed; opacity: .6; }
+.clear-btn.inactive:hover { background: var(--surface-2); color: var(--text-muted); border-color: var(--border); }
+
+/* ── Multi-select filter (references/multi-select-filter.md) ── */
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 190px; height: 34px; padding: 6px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: all .15s; white-space: nowrap; }
+.ms-btn:hover { border-color: var(--accent); }
+.ms-btn.has-selection { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-light); }
+.ms-btn.open { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.08); }
+.ms-btn .ms-count { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 20px; padding: 1px 7px; min-width: 18px; text-align: center; }
+.ms-btn .ms-arrow { font-size: 9px; color: var(--text-muted); transition: transform .2s; flex-shrink: 0; }
+.ms-btn.open .ms-arrow { transform: rotate(180deg); }
+.ms-menu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 200; width: 260px; max-width: 80vw; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); box-shadow: 0 8px 28px rgba(0,0,0,.14); display: none; flex-direction: column; overflow: hidden; }
+.ms-menu.open { display: flex; }
+.ms-selectall-row { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); font-size: 12px; font-weight: 700; cursor: pointer; user-select: none; }
+.ms-selectall-row:hover { background: #f0f4f8; }
+.ms-list { max-height: 220px; overflow-y: auto; padding: 4px; }
+.ms-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; font-size: 12.5px; cursor: pointer; user-select: none; transition: background .1s; }
+.ms-item:hover { background: var(--surface-2); }
+.ms-item.checked { background: var(--accent-light); }
+.ms-item input[type=checkbox], .ms-selectall-row input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+.ms-item .ms-item-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-empty { padding: 18px; text-align: center; font-size: 12px; color: var(--text-muted); }
+.ms-ftr-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.ms-ftr-clear { font-size: 11.5px; font-weight: 700; color: var(--red); background: none; border: none; cursor: pointer; padding: 4px 6px; border-radius: 5px; }
+.ms-ftr-clear:hover { background: var(--red-light); }
+.ms-ftr-count { font-size: 11px; color: var(--text-muted); }
+.ms-chips-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ms-chips-row:empty { display: none; }
+.chips-label { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.ms-chip { display: flex; align-items: center; gap: 5px; background: var(--accent-light); color: var(--accent-dark); border: 1px solid #bfdbfe; border-radius: 20px; padding: 3px 6px 3px 10px; font-size: 11.5px; font-weight: 600; }
+.ms-chip button { border: none; background: rgba(37,99,235,.15); color: var(--accent-dark); width: 16px; height: 16px; border-radius: 50%; font-size: 11px; cursor: pointer; line-height: 1; }
+.ms-chip button:hover { background: var(--accent); color: #fff; }
+
+.log-finput { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-family: inherit; font-size: 12px; color: var(--text-primary); background: var(--surface); outline: none; height: 34px; box-sizing: border-box; }
+.log-finput:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.08); }
+.log-finput.has-value { background: var(--accent-light); border-color: var(--accent); }
 .log-frow { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
 .log-fg { display: flex; flex-direction: column; gap: 3px; }
 .log-flabel { font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
-.log-fsel, .log-finput { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-family: inherit; font-size: 12px; color: var(--text-primary); background: var(--surface); outline: none; height: 34px; box-sizing: border-box; }
-.log-fsel:focus, .log-finput:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.08); }
-.log-fsel.w-emp { width: 160px; } .log-fsel.w-type { width: 140px; } .log-finput.w-search { width: 260px; }
-.log-clear-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border: 1px solid var(--red-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--red); background: var(--red-light); cursor: pointer; transition: all .15s; white-space: nowrap; height: 34px; }
-.log-clear-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
-.log-stats-bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
-.log-stat-chip { font-size: 11px; font-weight: 600; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; }
-.log-stat-chip strong { color: var(--text-primary); }
-.log-export-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border: 1px solid var(--green-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 11px; font-weight: 600; color: var(--green); background: var(--green-light); cursor: pointer; transition: all .15s; margin-right: auto; }
-.log-export-btn:hover { background: var(--green); color: #fff; }
-.log-pager { display: flex; align-items: center; gap: 6px; }
-.log-pager-btn { padding: 5px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: inherit; font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
+
+/* ── Results row (table bar) ─────────────────────────────────── */
+.tbl-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; background: var(--surface-2); cursor: pointer; user-select: none; transition: background .12s; flex-wrap: wrap; }
+.tbl-bar:hover { background: #f0f4f8; }
+.tbl-bar-right, .tbl-bar-left { display: flex; align-items: center; gap: 8px; }
+.tbl-toggle { font-size: 13px; color: var(--text-muted); transition: transform .25s; }
+.tbl-toggle.open { transform: rotate(180deg); }
+.tbl-body-wrap { overflow: hidden; }
+.tbl-body-wrap.collapsed { display: none; }
+.tbl-scroll { overflow-x: auto; border-radius: 0 0 var(--radius) var(--radius); }
+.results-wrap { display: flex; align-items: center; gap: 8px; }
+.results-label { font-size: 14px; font-weight: 800; color: var(--text-primary); white-space: nowrap; }
+.results-count { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 34px; padding: 0 10px; font-family: var(--font-mono); font-size: 17px; font-weight: 800; color: var(--purple); background: var(--purple-light); border: 1.5px solid var(--purple-border); border-radius: var(--radius-sm); }
+.act-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius-sm); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; height: 34px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-secondary); }
+.act-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.act-btn.export { border-color: var(--green-border); color: var(--green); background: var(--green-light); }
+.act-btn.export:hover { background: var(--green); color: #fff; }
+.log-pager-btn { padding: 5px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
 .log-pager-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.log-pager-btn:disabled { opacity: .4; cursor: not-allowed; }
+.log-pager-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Data Table (design-system.md § Data Tables) ─────────────── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.data-table thead th, .data-table tbody td { text-align: center; padding: 9px 10px; border-bottom: 1px solid var(--border); border-inline-start: 1px solid var(--border); }
+.data-table thead th:first-child, .data-table tbody td:first-child { border-inline-start: none; }
+.data-table thead th { background: var(--surface-2); font-size: 11px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.data-table tbody tr:hover { background: var(--surface-2); }
+.data-table .col-num { font-family: var(--font-mono); direction: ltr; white-space: nowrap; }
+.sortable-th { cursor: pointer; user-select: none; transition: background .12s, color .12s; }
+.sortable-th:hover { background: var(--accent-light); color: var(--accent-dark); }
+.sortable-th.sorted { background: var(--accent-light); color: var(--accent-dark); }
+.sort-icon { display: inline-block; font-size: 10px; color: var(--accent); font-weight: 900; }
+.sort-icon.active { margin-inline-start: 4px; }
+.empty-row td { padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px; }
 .log-body { overflow-y: auto; max-height: 600px; }
-.log-entry { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-start; transition: background .1s; }
-.log-entry:hover { background: var(--surface-2); }
-.log-entry-content { flex: 1; min-width: 0; }
-.log-entry-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
-.log-emp-badge { font-size: 11px; font-weight: 600; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 1px 7px; }
-.log-type-ok { background: var(--green-light); color: var(--green); }
 .log-meta { font-size: 11px; color: var(--text-muted); }
-.log-notes { font-size: 11px; color: var(--text-secondary); font-style: italic; margin-top: 2px; }
 .log-empty { padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px; }
 .loading-spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -325,7 +387,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
       <button class="hbtn" id="refreshBtn" onclick="doRefresh()"><span class="ico">↺</span> تحديث</button>
       <button class="hbtn active-user" id="activeUserBtn" onclick="doLogout()">👤 —</button>
       <button class="hbtn" id="aboutBtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-      <button class="hbtn ver-btn" onclick="openChangelog()">v1.2.1 📋</button>
+      <button class="hbtn ver-btn" id="verBtn" onclick="openChangelog()"></button>
       <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     </div>
   </div>
@@ -379,52 +441,116 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════
-       §LOG — Log Tab
+       §LOG — Log Tab (data-table-standard.md — unified section + table)
        ══════════════════════════════════════════════════════════════ -->
   <div id="logTabContent" class="tab-panel">
-    <div class="log-tab-wrap">
-      <div class="log-filters-body">
+    <div class="unified-section">
+
+      <!-- Filters header (collapsible) -->
+      <div class="flt-header" onclick="toggleLogFilters()">
+        <div class="flt-header-right">
+          <span class="flt-toggle open" id="logFltToggleIcon">▲</span>
+          <svg class="flt-icon" id="logFltIcon" viewBox="0 0 36 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="2 3 13 3 8.3 10.2 8.3 19 6.7 19 6.7 10.2 2 3"></polygon>
+            <line x1="18" y1="5"  x2="33" y2="5"></line>
+            <line x1="18" y1="11" x2="29" y2="11"></line>
+            <line x1="18" y1="17" x2="25" y2="17"></line>
+          </svg>
+        </div>
+        <button class="clear-btn inactive" id="logClearAllBtn"
+          onclick="event.stopPropagation(); clearLogFilters();">✕ مسح كل الفلاتر</button>
+      </div>
+
+      <div class="flt-body" id="logFltBody">
         <div class="log-frow">
           <div class="log-fg">
             <span class="log-flabel">الموظف</span>
-            <select class="log-fsel w-emp" id="logFilterEmployee" onchange="onLogFilterChange()">
-              <option value="">كل الموظفين</option>
-            </select>
+            <div class="ms-wrap" id="msWrap-logEmp">
+              <button class="ms-btn" id="msBtn-logEmp" data-default-label="كل الموظفين" onclick="msToggle('logEmp')">
+                <span id="msBtnLabel-logEmp">كل الموظفين</span><span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-menu" id="msMenu-logEmp">
+                <div class="ms-ftr-top">
+                  <button class="ms-ftr-clear" onclick="msClear('logEmp')">مسح الاختيار</button>
+                  <span class="ms-ftr-count" id="msFtrCount-logEmp"></span>
+                </div>
+                <div class="ms-selectall-row" onclick="msToggleSelectAll('logEmp')">
+                  <input type="checkbox" id="msSelectAll-logEmp" onclick="event.stopPropagation()" onchange="msToggleSelectAll('logEmp', this.checked)">
+                  <span id="msSelectAllLabel-logEmp">تحديد الكل</span>
+                </div>
+                <div class="ms-list" id="msList-logEmp"></div>
+              </div>
+            </div>
           </div>
           <div class="log-fg">
             <span class="log-flabel">نوع العملية</span>
-            <select class="log-fsel w-type" id="logFilterType" onchange="onLogFilterChange()">
-              <option value="">كل العمليات</option>
-              <option value="create">إنشاء</option>
-              <option value="update">تعديل</option>
-              <option value="delete">حذف</option>
-              <option value="reconcile">Reconcile</option>
-            </select>
+            <div class="ms-wrap" id="msWrap-logType">
+              <button class="ms-btn" id="msBtn-logType" data-default-label="كل العمليات" onclick="msToggle('logType')">
+                <span id="msBtnLabel-logType">كل العمليات</span><span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-menu" id="msMenu-logType">
+                <div class="ms-ftr-top">
+                  <button class="ms-ftr-clear" onclick="msClear('logType')">مسح الاختيار</button>
+                  <span class="ms-ftr-count" id="msFtrCount-logType"></span>
+                </div>
+                <div class="ms-selectall-row" onclick="msToggleSelectAll('logType')">
+                  <input type="checkbox" id="msSelectAll-logType" onclick="event.stopPropagation()" onchange="msToggleSelectAll('logType', this.checked)">
+                  <span id="msSelectAllLabel-logType">تحديد الكل</span>
+                </div>
+                <div class="ms-list" id="msList-logType"></div>
+              </div>
+            </div>
           </div>
           <div class="log-fg" style="flex:1;">
             <span class="log-flabel">بحث في الملحوظات</span>
-            <input type="text" class="log-finput w-search" style="width:100%;" id="logSearch"
+            <input type="text" class="log-finput" style="width:100%;" id="logSearch"
               placeholder="ابحث في الملحوظات..." oninput="onLogSearchInput()" />
           </div>
-          <div class="log-fg" style="align-self:flex-end;">
-            <button class="log-clear-btn" onclick="clearLogFilters()">✕ مسح الفلاتر</button>
+        </div>
+
+        <div class="ms-chips-row" id="chipsRow-logEmp"></div>
+        <div class="ms-chips-row" id="chipsRow-logType"></div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Table bar (collapsible, results count + actions) -->
+      <div class="tbl-bar" onclick="toggleLogTable()">
+        <div class="tbl-bar-right">
+          <span class="tbl-toggle open" id="logTblToggleIcon">▲</span>
+          <div class="results-wrap">
+            <span class="results-label">النتائج:</span>
+            <span class="results-count" id="logTotalCount">—</span>
           </div>
         </div>
-      </div>
-
-      <div class="log-stats-bar">
-        <button class="hbtn" onclick="loadLog(true)">↺ تحديث</button>
-        <div class="log-stat-chip">الإجمالي: <strong id="logTotalCount">—</strong></div>
-        <div class="log-pager">
-          <button class="log-pager-btn" id="logPrevBtn" onclick="logPrevPage()">◀ السابق</button>
+        <div class="tbl-bar-left">
+          <button class="act-btn" onclick="event.stopPropagation(); loadLog(true);">↺ تحديث</button>
+          <button class="log-pager-btn" id="logPrevBtn" onclick="event.stopPropagation(); logPrevPage();">◀ السابق</button>
           <span class="log-meta" id="logPageInfo">—</span>
-          <button class="log-pager-btn" id="logNextBtn" onclick="logNextPage()">التالي ▶</button>
+          <button class="log-pager-btn" id="logNextBtn" onclick="event.stopPropagation(); logNextPage();">التالي ▶</button>
+          <button class="act-btn export" onclick="event.stopPropagation(); exportLogXlsx();">⬇ تصدير .xlsx</button>
         </div>
-        <button class="log-export-btn" onclick="exportLogXlsx()">⬇ تصدير .xlsx</button>
       </div>
 
-      <div class="log-body" id="logBody">
-        <div class="log-empty">اضغط تحديث لتحميل السجل</div>
+      <div class="tbl-body-wrap" id="logTblBodyWrap">
+        <div class="tbl-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="sortable-th" data-sort-key="timestamp" onclick="toggleLogSort('timestamp')">
+                  التاريخ والوقت<span class="sort-icon" data-sort-key="timestamp"></span>
+                </th>
+                <th>الموظف</th>
+                <th>النوع</th>
+                <th>الملاحظات</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              <tr class="empty-row"><td colspan="4">اضغط تحديث لتحميل السجل</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -437,6 +563,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <button class="login-settings-btn missing" id="loginSettingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
+    <div class="login-version" id="loginVersionText"></div>
     <div class="login-top">
       <div class="login-icon">🔗</div>
       <div class="login-title">Webhook Control Center</div>
@@ -523,7 +650,19 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
     <div class="eco-modal-body">
       <div class="cl-version-block">
         <div class="cl-version-row">
-          <span class="cl-ver-badge">v1.2.1</span>
+          <span class="cl-ver-badge">v1.3.0</span>
+          <span class="cl-ver-date">21-08-2026</span>
+        </div>
+        <ul class="cl-items">
+          <li class="cl-item"><span class="cl-tag new">جديد</span><span>إيقاف مؤقت (⏸️ Pause) واستئناف (▶️ Resume) للويبهوك — شوبيفاي مالوش mutation لإيقاف اشتراك مؤقتاً، فالإيقاف بيحذف الاشتراك فعلياً من شوبيفاي (تتوقف الاستقبالات فوراً) لكن يحتفظ بكل إعداداته (topic/uri/filter/includeFields/metafields) في D1 بحالة <code>paused</code>. الاستئناف بيعيد الإنشاء بنفس الإعدادات بضغطة واحدة من غير إعادة كتابة أي حاجة.</span></li>
+          <li class="cl-item"><span class="cl-tag change">تغيير</span><span>سجل العمليات (📜) اتحوّل من شكل بطاقات لجدول <code>&lt;table&gt;</code> بمعيار data-table-standard — فلاتر "الموظف" و"نوع العملية" بقت اختيار متعدد (checkbox dropdown) بدل قائمة واحد/الكل، مع chips لكل فلتر وترتيب على عمود التاريخ.</span></li>
+          <li class="cl-item"><span class="cl-tag change">تغيير</span><span>توحيد رقم النسخة في مصدر واحد (<code>TOOL_VERSION</code>) بدل 3 نصوص منفصلة كانت بتتزامن يدويًا.</span></li>
+          <li class="cl-item"><span class="cl-tag change">تغيير</span><span>صيغة عرض التاريخ+الوقت اتحدّثت للشكل الموحّد <code>📅 DD/MM/YYYY 🕐 HH:MM</code> بدون "الساعة"، وخط واحد (Noto Sans Arabic) بدل IBM Plex Mono، و<code>--container-max</code> بقى 1200px (Tier M — الأداة فيها Log Tab).</span></li>
+        </ul>
+      </div>
+      <div class="cl-version-block">
+        <div class="cl-version-row">
+          <span class="cl-ver-badge old">v1.2.1</span>
           <span class="cl-ver-date">15-08-2026</span>
         </div>
         <ul class="cl-items">
@@ -592,21 +731,34 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li>لو استخدمت "🧪 استقبال هنا": أي event حقيقي من شوبيفاي هيوصل لنفس الأداة على <code>/test-receive</code>، ويظهر في تاب "🧪 تجربة الاستقبال" فيه الـ payload كامل — مفيدة قبل ما توصّل الـ topic لأداتك الحقيقية.</li>
             <li>تاب "المراقبة" → بيوري آخر نشاط لكل tool_name من جدول logs المشترك، وأي subscription اتشال من شوبيفاي بصمت.</li>
             <li>زرار "Reconcile مع شوبيفاي" (في تاب الإدارة) → مقارنة حية: أي subscription نشط محلياً بس مش موجود على شوبيفاي بيتعلّم "اتشال"، وأي subscription موجود على شوبيفاي بس مش مسجّل هنا (اتعمل من GraphiQL مثلاً) بيظهر في صندوق "غير مسجّل" مع خيار تسجيله.</li>
+            <li>⏸️ "إيقاف مؤقت" على أي كارت نشط → يحذف الاشتراك من شوبيفاي فورًا مع الاحتفاظ بإعداداته؛ ▶️ "استئناف" على الكارت الموقوف → يعيد الإنشاء بنفس الإعدادات. لا حاجة لإعادة كتابة topic/uri/filter/metafields عند الاستئناف.</li>
           </ol>
 
           <h4>الـ Endpoints الرئيسية</h4>
           <table>
             <tr><th>action</th><th>الوصف</th></tr>
-            <tr><td><code>list_subscriptions</code></td><td>قائمة حية من شوبيفاي مدموجة مع الأرشيف المحلي</td></tr>
+            <tr><td><code>list_subscriptions</code></td><td>قائمة حية من شوبيفاي مدموجة مع الأرشيف المحلي + الاشتراكات الموقوفة مؤقتًا (مش حية على شوبيفاي، موجودة في D1 بس)</td></tr>
             <tr><td><code>create_subscription</code></td><td>webhookSubscriptionCreate + تسجيل محلي</td></tr>
             <tr><td><code>update_subscription</code></td><td>webhookSubscriptionUpdate (لو فيه حقل شوبيفاي اتغيّر) + تحديث محلي</td></tr>
-            <tr><td><code>delete_subscription</code></td><td>webhookSubscriptionDelete + تعليم محلي deleted_manually</td></tr>
-            <tr><td><code>reconcile_subscriptions</code></td><td>مقارنة حية مع شوبيفاي — يكتشف الحذف الصامت + الاشتراكات غير المسجّلة</td></tr>
+            <tr><td><code>pause_subscription</code></td><td>⏸️ إيقاف مؤقت — webhookSubscriptionDelete من شوبيفاي (توقف فوري) + الاحتفاظ الكامل بالإعدادات في D1 بحالة <code>paused</code></td></tr>
+            <tr><td><code>resume_subscription</code></td><td>▶️ استئناف — webhookSubscriptionCreate من نفس الإعدادات المحفوظة + تحديث subscription_gid الجديد في D1</td></tr>
+            <tr><td><code>delete_subscription</code></td><td>webhookSubscriptionDelete + تعليم محلي deleted_manually (للاشتراك الحي)</td></tr>
+            <tr><td><code>delete_paused_subscription</code></td><td>حذف نهائي لاشتراك موقوف مؤقتًا — D1 فقط، من غير نداء لشوبيفاي (مفيش نسخة حية أصلاً)</td></tr>
+            <tr><td><code>reconcile_subscriptions</code></td><td>مقارنة حية مع شوبيفاي — يكتشف الحذف الصامت + الاشتراكات غير المسجّلة (الاشتراكات الموقوفة مؤقتًا مستثناة من الفحص عمداً)</td></tr>
             <tr><td><code>get_monitoring_summary</code></td><td>تجميع من جدول logs المشترك — آخر نشاط + فشل آخر 24 ساعة لكل tool_name</td></tr>
             <tr><td><code>get_topics_reference</code></td><td>قائمة مرجعية لأشهر topics (مش كل القائمة — أي اسم تاني يتقبل ويتحقق منه شوبيفاي نفسه)</td></tr>
             <tr><td><code>get_known_tool_names</code></td><td>قيم tool المميزة من جدول logs + اسم الأداة نفسها — بتغذي datalist حقل "اسم الأداة المستهدفة"</td></tr>
             <tr><td><code>get_test_received</code> / <code>clear_test_received</code></td><td>عرض/مسح آخر 50 webhook وصلوا على <code>/test-receive</code> — يشمل نتيجة الـ metafield enrichment لو مفعّلة</td></tr>
             <tr><td><code>POST /test-receive</code> (مش action، path منفصل)</td><td>الـ route اللي بيستقبل webhooks حقيقية من شوبيفاي للتجربة — HMAC بـ CLIENT_SECRET، من غير login، وبيعمل query مباشر لجيب METAFIELDS لو مسجّلة على نفس الـ subscription</td></tr>
+          </table>
+
+          <h4>⚙️ إجراءات كل خيار — حالة الـ Webhook</h4>
+          <table>
+            <tr><th>الحالة</th><th>الإجراءات المتاحة</th></tr>
+            <tr><td>نشط (Active — حي على شوبيفاي)</td><td>✏️ تعديل · ⏸️ إيقاف مؤقت · 🗑 حذف نهائي (من داخل مودال التعديل)</td></tr>
+            <tr><td>⏸️ موقوف مؤقتًا (Paused — محذوف من شوبيفاي، محفوظ في D1)</td><td>▶️ استئناف (يعيد الإنشاء بنفس الإعدادات) · 🗑 حذف نهائي (D1 فقط)</td></tr>
+            <tr><td>مسجّل جزئياً (Untracked — موجود على شوبيفاي، بدون بيانات محلية)</td><td>📝 تسجيل هنا (من صندوق "Reconcile") — يربطه بالأرشيف المحلي، بعدها بياخد إجراءات "نشط" العادية</td></tr>
+            <tr><td>اتشال من شوبيفاي (removed_by_shopify — يظهر في تاب المراقبة بس)</td><td>لا يوجد إجراء آلي — يحتاج مراجعة وإعادة إنشاء يدوية لو لسه مطلوب</td></tr>
           </table>
         </div>
       </details>
@@ -617,11 +769,12 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
           <h4>FEATURE MAP</h4>
           <ul>
             <li><code>§AUTH</code> — Universal D1 Auth (check_employee / register_pin / verify_employee / log_logout / get_employees)</li>
-            <li><code>§WEBHOOKS</code> (Worker) — كل منطق الإدارة والـ reconcile والمراقبة + get_known_tool_names</li>
+            <li><code>§WEBHOOKS</code> (Worker) — كل منطق الإدارة (create/update/delete/pause/resume/delete_paused) والـ reconcile والمراقبة + get_known_tool_names</li>
             <li><code>§TEST-RECEIVE</code> (Worker) — <code>handleTestReceive</code> (route <code>/test-receive</code>، بره الـ WORKER_SECRET gate) + get_test_received / clear_test_received</li>
             <li><code>§SHOPIFY::metafieldEnrichment</code> — <code>fetchMetafieldEnrichment</code> + <code>METAFIELD_FETCHABLE_FIELDS</code> allow-list — query مباشر لـ Product/ProductVariant نودز بعد كل استقبال ناجح</li>
             <li><code>§HELPERS::safeEqual / verifyShopifyHmac</code> — نفس نمط webhook-receivers.md، بس بـ CLIENT_SECRET بدل SHOPIFY_WEBHOOK_SECRET (لأن كل subscriptions الأداة دي API-registered)</li>
-            <li><code>§TOOL-JS</code> (HTML) — Management tab + Monitoring tab + Test Receiver tab + Webhook form modal + Filter Builder + Metafield Fetch Fields picker</li>
+            <li><code>§TOOL-JS</code> (HTML) — Management tab (بما فيها ⏸️ Pause/▶️ Resume) + Monitoring tab + Test Receiver tab + Webhook form modal + Filter Builder + Metafield Fetch Fields picker</li>
+            <li><code>§LOG-JS</code> (HTML) — Log Tab بمعيار data-table-standard: جدول + فلاتر اختيار متعدد (الموظف/النوع) + ترتيب على عمود التاريخ + pagination من السيرفر (100/صفحة)</li>
             <li><code>§LOG-ENDPOINTS</code> — get_logs / get_logs_count / get_logs_export (نمط v2 — pagination 100/صفحة)</li>
           </ul>
 
@@ -634,6 +787,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li><code>test_received_webhooks</code> — جدول D1 تاني، بيخزّن كل payload وصل على <code>/test-receive</code> (خام، JSON نصي) + نتيجة الـ enrichment لو حصلت</li>
             <li><code>filterRowsState</code> (HTML) — حالة الـ Filter Builder الحالية في الذاكرة، بتتحول لصيغة شوبيفاي عن طريق <code>buildFilterFromRows()</code></li>
             <li><code>METAFIELD_FETCHABLE_FIELDS</code> (Worker) — allow-list مؤكدة من توثيق شوبيفاي (id/namespace/key/value/type/description/createdAt/updatedAt) — مفيش حقل بيتمرر من D1 للـ query من غير ما يتفلتر عليها الأول</li>
+            <li><code>webhook_registry.status</code> — <code>active</code> / <code>paused</code> / <code>removed_by_shopify</code> / <code>deleted_manually</code>. عند <code>paused</code>: <code>subscription_gid</code> بيفضل يحمل الـ gid القديم كمفتاح بحث لحد ما يتم Resume، وقتها بيتحدّث لقيمة gid جديدة من شوبيفاي</li>
+            <li><code>msState</code> (HTML، §LOG-JS) — حالة فلاتر الـ Log Tab متعددة الاختيار (<code>logEmp</code>, <code>logType</code>) — نفس نمط <code>multi-select-filter.md</code> الموحّد</li>
           </ul>
 
           <h4>NOTES</h4>
@@ -646,7 +801,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text-p
             <li>METAFIELDS بقى بصيغة <code>namespace.key</code> (نقطة) — سطر مكتوب غلط بيوقف الحفظ بتحذير واضح، بدل ما يتسجل بصمت كمصفوفة فاضية زي قبل كده.</li>
             <li>⚠️ Metafield Enrichment (query مباشر) بيشتغل بس على subscriptions الـ URI بتاعتها هو <code>/test-receive</code> بتاع نفس الأداة — مش أي webhook تاني. الحقول اللي بتتجاب محدّدة عن طريق checkboxes في فورم الإنشاء/التعديل (افتراضي: namespace + key + value). العملية best-effort — أي فشل فيها (مثلاً الـ metafield مش موجود على المورد ده) بيتسجل كـ <code>{namespace, key, found:false}</code> بدل ما يوقف حفظ الـ payload الخام.</li>
             <li>⚠️ <code>/test-receive</code> بيتحقق بـ HMAC مش WORKER_SECRET — أي حد يعرف الرابط ده وعنده CLIENT_SECRET الصحيح (يعني بس شوبيفاي فعلياً) يقدر يبعتله. البيانات المستلمة بتتخزن خام كما هي في D1، فلو فيها بيانات عميل حساسة، متنساش تمسحها بزرار "🗑 مسح الكل" بعد التجربة.</li>
-            <li>Log tab بيستخدم نمط v2 (pagination من السيرفر، 100 صف/صفحة) بدل التحميل الكامل + فلترة client-side القديمة.</li>
+            <li>Log tab بيستخدم نمط v2 (pagination من السيرفر، 100 صف/صفحة) + فلاتر اختيار متعدد (الموظف/النوع) بمعيار data-table-standard — بدل القوائم المفردة والتحميل الكامل القديم.</li>
+            <li>⚠️ <strong>Pause ≠ ميزة شوبيفاي حقيقية:</strong> شوبيفاي مالوش mutation لتعليق اشتراك مؤقتًا، فالإيقاف المؤقت بيحذف الاشتراك فعليًا من شوبيفاي (<code>webhookSubscriptionDelete</code>) — الفرق الوحيد عن الحذف النهائي إن الإعدادات (topic/uri/filter/includeFields/metafields) بتتحفظ في D1 (<code>status='paused'</code>) بدل ما تتمسح، فالاستئناف بيعيد <code>webhookSubscriptionCreate</code> بنفس القيم من غير إعادة كتابة أي حاجة. النتيجة: الاشتراك الموقوف مؤقتًا مالوش وجود على شوبيفاي إطلاقًا لحد ما يتم استئنافه — لو شخص تاني شافه في GraphiQL هيلاقيه مش موجود.</li>
           </ul>
         </div>
       </details>
@@ -838,14 +994,39 @@ function formatDateTime(iso) {
   let h = d.getUTCHours();
   const ampm = h >= 12 ? 'مساءً' : 'صباحاً';
   h = h % 12 || 12;
-  return `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()} الساعة ${pad(h)}:${pad(d.getUTCMinutes())} ${ampm}`;
+  return `📅 ${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()} 🕐 ${pad(h)}:${pad(d.getUTCMinutes())} ${ampm}`;
 }
 function formatDate(iso) {
   const d = toCairo(iso), pad = n => String(n).padStart(2, '0');
+  return `📅 ${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`;
+}
+// عمود "التاريخ" في تصدير XLSX فقط — بدون إيموجي (datetime-format.md §4)
+function formatDateForExport(iso) {
+  const d = toCairo(iso), pad = n => String(n).padStart(2, '0');
   return `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
+}
+// عمود "الوقت" في تصدير XLSX فقط — بدون إيموجي، منفصل عن formatDateTime
+function formatTimeForExport(iso) {
+  const d = toCairo(iso), pad = n => String(n).padStart(2, '0');
+  let h = d.getUTCHours();
+  const ampm = h >= 12 ? 'مساءً' : 'صباحاً';
+  h = h % 12 || 12;
+  return `${pad(h)}:${pad(d.getUTCMinutes())} ${ampm}`;
 }
 
 // ── §SHELL-JS ────────────────────────────────────────────────
+const TOOL_VERSION = 'v1.3.0'; // ← CHANGE VERSION هنا بس — single source of truth
+// يملّي زرار الهيدر + بادج الـ changelog + نص شاشة اللوجن دفعة واحدة — مفيش
+// رقم نسخة hardcoded في أي مكان تاني.
+function renderVersionUI() {
+  const verBtn = document.getElementById('verBtn');
+  if (verBtn) verBtn.textContent = `${TOOL_VERSION} 📋`;
+  const clBadge = document.querySelector('.cl-ver-badge');
+  if (clBadge) clBadge.textContent = TOOL_VERSION;
+  const loginVer = document.getElementById('loginVersionText');
+  if (loginVer) loginVer.textContent = TOOL_VERSION;
+}
+
 function openSettings() {
   const c = getConfig();
   document.getElementById('cfgUrl').value      = c.workerUrl    || '';
@@ -971,12 +1152,11 @@ async function loadEmployeesList() {
     sel.disabled = false;
     status.className = employees.length ? 'login-status info' : 'login-status warn';
     status.textContent = employees.length ? 'اختر الموظف للمتابعة.' : 'لا يوجد موظفون نشطون.';
-    // populate the log tab employee filter too
-    const logSel = document.getElementById('logFilterEmployee');
-    if (logSel) {
-      logSel.innerHTML = '<option value="">كل الموظفين</option>' +
-        employees.map(e => `<option value="${e.username}">${e.display_name}</option>`).join('');
-    }
+    // shares the same fetch to populate the Log tab's employee multi-select
+    // filter — avoids a second get_employees call when the tool boots.
+    msState.logEmp.items = employees.map(e => ({ value: e.username, label: e.display_name }));
+    logFilterOptionsLoaded = true;
+    msState.logType.items = Object.entries(LOG_TYPE_LABELS).map(([value, label]) => ({ value, label }));
   } catch (err) {
     status.className = 'login-status error';
     status.textContent = 'تعذّر تحميل قائمة الموظفين.';
@@ -1187,7 +1367,7 @@ function switchMainTab(tab) {
   if (tab === 'manage' && !manageLoaded) { manageLoaded = true; loadManagement(); }
   if (tab === 'monitor') loadMonitoring();
   if (tab === 'test') loadTestReceived();
-  if (tab === 'log' && !logLoaded) loadLog(true);
+  if (tab === 'log' && !logLoaded) { loadLogFilterOptions(); loadLog(true); }
 }
 
 // ── §TOOL::topicsReference ─────────────────────────────────────
@@ -1233,20 +1413,63 @@ function renderWebhookList(subs) {
   }
   wrap.innerHTML = subs.map((s, idx) => {
     const untracked = s.trackedLocally ? '' : '<span class="wh-badge wh-badge-warn">مسجّل جزئياً — بدون بيانات محلية</span>';
-    return `<div class="wh-card">
+    const pausedBadge = s.paused ? '<span class="wh-badge wh-badge-warn">⏸️ موقوف مؤقتًا</span>' : '';
+    // ⚠️ الويبهوك الموقوف مؤقتًا مالوش نسخة حية على شوبيفاي (اتحذف عمداً وقت
+    // الإيقاف) — فـ "تعديل" مش متاح ليه (webhookSubscriptionUpdate هيفشل على
+    // gid مش موجود). الإجراءات المتاحة له استئناف أو حذف نهائي بس — انظر
+    // جدول "⚙️ إجراءات كل خيار" في About.
+    const actions = s.paused
+      ? `<button class="hbtn" style="border-color:var(--green-border);color:var(--green);background:var(--green-light);" onclick="resumeSubscription('${s.id}')">▶️ استئناف</button>
+         <button class="hbtn" style="border-color:var(--red-border);color:var(--red);background:var(--red-light);" onclick="deletePausedSubscription('${s.id}', '${s.topic}')">🗑 حذف نهائي</button>`
+      : `<button class="hbtn" onclick="openWebhookModal('edit', whSubsCache[${idx}])">✏️ تعديل</button>
+         <button class="hbtn" style="border-color:var(--amber);color:var(--amber);background:var(--amber-light);" onclick="pauseSubscription('${s.id}', '${s.topic}')">⏸️ إيقاف مؤقت</button>`;
+    return `<div class="wh-card${s.paused ? ' wh-card-alert' : ''}">
       <div class="wh-card-top">
         <span class="wh-badge wh-badge-topic">${s.topic}</span>
         ${s.toolName ? `<span class="wh-badge wh-badge-tool">${s.toolName}</span>` : ''}
-        ${untracked}
+        ${pausedBadge}${untracked}
       </div>
       <div class="wh-uri">${s.uri}</div>
       ${s.purpose ? `<div class="wh-purpose">${s.purpose}</div>` : ''}
       ${s.filter ? `<div class="wh-meta">🔎 filter: <code>${s.filter}</code></div>` : ''}
-      <div class="wh-card-actions">
-        <button class="hbtn" onclick="openWebhookModal('edit', whSubsCache[${idx}])">✏️ تعديل</button>
-      </div>
+      <div class="wh-card-actions">${actions}</div>
     </div>`;
   }).join('');
+}
+
+// ── §TOOL::pauseResume — Shopify has no native pause; إيقاف = حذف الاشتراك
+// الحي من شوبيفاي (تتوقف الاستقبالات فوراً) مع الاحتفاظ الكامل بإعداداته في
+// D1 (status='paused')، عشان الاستئناف يعيد إنشاءه بنفس القيم بضغطة واحدة.
+async function pauseSubscription(subscriptionGid, topic) {
+  showConfirm(`إيقاف الـ webhook (${topic}) مؤقتًا؟ هتتوقف الاستقبالات فورًا، وتقدر تستأنفه في أي وقت من نفس المكان.`, async () => {
+    try {
+      await apiPost('pause_subscription', { subscriptionGid, employee: currentEmployee?.username });
+      showToast('تم الإيقاف المؤقت ✓', 'success');
+      loadManagement();
+    } catch (err) {
+      showToast(err.message || 'تعذّر الإيقاف', 'error');
+    }
+  });
+}
+async function resumeSubscription(subscriptionGid) {
+  try {
+    await apiPost('resume_subscription', { subscriptionGid, employee: currentEmployee?.username });
+    showToast('تم الاستئناف ✓', 'success');
+    loadManagement();
+  } catch (err) {
+    showToast(err.message || 'تعذّر الاستئناف', 'error');
+  }
+}
+function deletePausedSubscription(subscriptionGid, topic) {
+  showConfirm(`حذف الـ webhook الموقوف (${topic}) نهائيًا؟ هذا لا يمكن التراجع عنه.`, async () => {
+    try {
+      await apiPost('delete_paused_subscription', { subscriptionGid, employee: currentEmployee?.username });
+      showToast('تم الحذف النهائي ✓', 'success');
+      loadManagement();
+    } catch (err) {
+      showToast(err.message || 'تعذّر الحذف', 'error');
+    }
+  });
 }
 
 async function doReconcile() {
@@ -1629,31 +1852,180 @@ function renderMonitoring(data) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// §LOG-JS — Log tab (v2 pattern: server pagination 100/page)
+// §LOG-JS — Log tab (server pagination 100/page + multi-select filters +
+// unified section + sortable date column — data-table-standard.md)
 // ══════════════════════════════════════════════════════════════
 let logPage = 0;
 const LOG_PAGE_SIZE = 100;
 let logTotal = 0;
 let logSearchDebounce = null;
+let logCurrentEntries = []; // current page's raw rows — sort works on this, independent of filters
+let logSortDir = null;      // 'asc' | 'desc' | null
 
+const LOG_TYPE_LABELS = { create: 'إنشاء', update: 'تعديل', delete: 'حذف', pause: 'إيقاف مؤقت', resume: 'استئناف', reconcile: 'Reconcile' };
+const LOG_TYPE_CLASS  = { create: 'wh-badge-ok', update: 'wh-badge-tool', delete: 'wh-badge-danger', pause: 'wh-badge-warn', resume: 'wh-badge-ok', reconcile: 'wh-badge-warn' };
+
+// ── §PARENT::msState — multi-select filters (logEmp, logType) ──
+const msState = {
+  logEmp:  { items: [], selected: new Set(), search: '' },
+  logType: { items: [], selected: new Set(), search: '' },
+};
+const filterLabels = { logEmp: 'الموظف', logType: 'نوع العملية' };
+let logFilterOptionsLoaded = false;
+
+async function loadLogFilterOptions() {
+  if (!logFilterOptionsLoaded) {
+    try {
+      const data = await apiGet('get_employees');
+      msState.logEmp.items = (data.employees || []).map(e => ({ value: e.username, label: e.display_name }));
+      logFilterOptionsLoaded = true;
+    } catch (err) { /* non-critical — filter still usable once retried */ }
+    msState.logType.items = Object.entries(LOG_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+  }
+  msRenderList('logEmp'); msRenderList('logType');
+}
+
+function msRenderList(key) {
+  const st = msState[key];
+  const listEl = document.getElementById(`msList-${key}`);
+  listEl.innerHTML = !st.items.length
+    ? '<div class="ms-empty">لا توجد عناصر</div>'
+    : st.items.map(it => {
+        const checked = st.selected.has(it.value);
+        return `<div class="ms-item ${checked ? 'checked' : ''}" onclick="msToggleItem('${key}','${it.value}')">
+          <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation(); msToggleItem('${key}','${it.value}')">
+          <span class="ms-item-label">${it.label}</span>
+        </div>`;
+      }).join('');
+  const allChecked = st.items.length > 0 && st.items.every(it => st.selected.has(it.value));
+  const selectAllCb = document.getElementById(`msSelectAll-${key}`);
+  if (selectAllCb) selectAllCb.checked = allChecked;
+  msUpdateButtonLabel(key);
+  document.getElementById(`msFtrCount-${key}`).textContent = `${st.selected.size} مختار`;
+}
+function msUpdateButtonLabel(key) {
+  const st = msState[key];
+  const btn = document.getElementById(`msBtn-${key}`);
+  const lbl = document.getElementById(`msBtnLabel-${key}`);
+  const n = st.selected.size;
+  btn.classList.toggle('has-selection', n > 0);
+  if (n === 0)      lbl.textContent = btn.dataset.defaultLabel || 'الكل';
+  else if (n === 1) lbl.textContent = st.items.find(it => it.value === [...st.selected][0])?.label || [...st.selected][0];
+  else              lbl.innerHTML   = `${n} محددين <span class="ms-count">${n}</span>`;
+}
+function msToggle(key) {
+  const menu = document.getElementById(`msMenu-${key}`), btn = document.getElementById(`msBtn-${key}`);
+  const willOpen = !menu.classList.contains('open');
+  Object.keys(msState).forEach(k => {
+    document.getElementById(`msMenu-${k}`).classList.remove('open');
+    document.getElementById(`msBtn-${k}`).classList.remove('open');
+  });
+  if (willOpen) { menu.classList.add('open'); btn.classList.add('open'); }
+}
+function msToggleItem(key, value) {
+  const st = msState[key];
+  st.selected.has(value) ? st.selected.delete(value) : st.selected.add(value);
+  msRenderList(key); renderLogChips(); updateLogFilterIconState(); loadLog(true);
+}
+function msToggleSelectAll(key, forceState) {
+  const st = msState[key];
+  const shouldCheck = forceState !== undefined ? forceState : !st.items.every(it => st.selected.has(it.value));
+  st.items.forEach(it => shouldCheck ? st.selected.add(it.value) : st.selected.delete(it.value));
+  msRenderList(key); renderLogChips(); updateLogFilterIconState(); loadLog(true);
+}
+function msClear(key) {
+  msState[key].selected.clear();
+  msRenderList(key); renderLogChips(); updateLogFilterIconState(); loadLog(true);
+}
+document.addEventListener('click', (e) => {
+  Object.keys(msState).forEach(k => {
+    const wrap = document.getElementById(`msWrap-${k}`);
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById(`msMenu-${k}`).classList.remove('open');
+      document.getElementById(`msBtn-${k}`).classList.remove('open');
+    }
+  });
+});
+function renderLogChips() {
+  Object.keys(msState).forEach(key => {
+    const row = document.getElementById(`chipsRow-${key}`);
+    if (!row) return;
+    const label = filterLabels[key] || key;
+    const chips = [...msState[key].selected].map(val => {
+      const item = msState[key].items.find(it => it.value === val);
+      const v = item ? item.label : val;
+      return `<span class="ms-chip">${v}<button onclick="msToggleItem('${key}','${val.replace(/'/g, "\\'")}')">✕</button></span>`;
+    }).join('');
+    row.innerHTML = chips ? `<span class="chips-label">${label}:</span>${chips}` : '';
+  });
+}
+
+// ── §PARENT::anyFilterActive — truthy checks only, never `!== null` ──
+function anyLogFilterActive() {
+  const msActive = Object.keys(msState).some(k => msState[k].selected.size > 0);
+  return msActive || document.getElementById('logSearch').value.trim().length > 0;
+}
+function updateLogFilterIconState() {
+  const active = anyLogFilterActive();
+  document.getElementById('logFltIcon').classList.toggle('active', active);
+  document.getElementById('logClearAllBtn').classList.toggle('inactive', !active);
+}
+
+// ── Filters / table collapse ────────────────────────────────────
+function toggleLogFilters() {
+  const body = document.getElementById('logFltBody'), icon = document.getElementById('logFltToggleIcon');
+  body.classList.toggle('collapsed'); icon.classList.toggle('open');
+}
+function toggleLogTable() {
+  const wrap = document.getElementById('logTblBodyWrap'), icon = document.getElementById('logTblToggleIcon');
+  wrap.classList.toggle('collapsed'); icon.classList.toggle('open');
+}
+
+// ── Sorting (independent of filters — data-table-standard.md § 8) ──
+function toggleLogSort(key) {
+  if (logSortDir === null) logSortDir = 'asc';
+  else if (logSortDir === 'asc') logSortDir = 'desc';
+  else logSortDir = null;
+  document.querySelectorAll('.sortable-th').forEach(th => th.classList.toggle('sorted', logSortDir !== null && th.dataset.sortKey === key));
+  document.querySelectorAll('.sort-icon').forEach(el => {
+    el.classList.remove('active');
+    el.textContent = '';
+    if (logSortDir !== null && el.dataset.sortKey === key) {
+      el.classList.add('active');
+      el.textContent = logSortDir === 'asc' ? '▲' : '▼';
+    }
+  });
+  renderLogTable(applyLogSort(logCurrentEntries));
+}
+function applyLogSort(entries) {
+  if (logSortDir === null) return entries;
+  return [...entries].sort((a, b) => {
+    const ta = a.timestamp || '', tb = b.timestamp || '';
+    return logSortDir === 'asc' ? ta.localeCompare(tb) : tb.localeCompare(ta);
+  });
+}
+
+// ── Data fetching (server-side filter + pagination) ─────────────
 async function loadLog(resetPage) {
   if (resetPage) logPage = 0;
   const body = document.getElementById('logBody');
-  body.innerHTML = '<div class="log-empty"><div class="loading-spinner"></div></div>';
-  const employee = document.getElementById('logFilterEmployee').value;
-  const type     = document.getElementById('logFilterType').value;
+  body.innerHTML = '<tr class="empty-row"><td colspan="4"><div class="loading-spinner"></div></td></tr>';
+  const employee = [...msState.logEmp.selected].join(',');
+  const type     = [...msState.logType.selected].join(',');
   const search   = document.getElementById('logSearch').value.trim();
   try {
     const [listData, countData] = await Promise.all([
       apiGet('get_logs',       { employee, type, search, limit: LOG_PAGE_SIZE, offset: logPage * LOG_PAGE_SIZE }),
-      apiGet('get_logs_count', { employee, search }),
+      apiGet('get_logs_count', { employee, type, search }),
     ]);
     logLoaded = true;
     logTotal = countData.total || 0;
-    renderLog(listData.entries || []);
+    logCurrentEntries = listData.entries || [];
+    renderLogTable(applyLogSort(logCurrentEntries));
     updateLogPager();
+    updateLogFilterIconState();
   } catch (err) {
-    body.innerHTML = `<div class="log-empty">⚠️ ${err.message}</div>`;
+    body.innerHTML = `<tr class="empty-row"><td colspan="4">⚠️ ${err.message}</td></tr>`;
   }
 }
 function updateLogPager() {
@@ -1665,44 +2037,47 @@ function updateLogPager() {
 }
 function logPrevPage() { if (logPage > 0) { logPage--; loadLog(false); } }
 function logNextPage() { logPage++; loadLog(false); }
-function onLogSearchInput() { clearTimeout(logSearchDebounce); logSearchDebounce = setTimeout(() => loadLog(true), 350); }
-function onLogFilterChange() { loadLog(true); }
+function onLogSearchInput() {
+  clearTimeout(logSearchDebounce);
+  document.getElementById('logSearch').classList.toggle('has-value', document.getElementById('logSearch').value.length > 0);
+  logSearchDebounce = setTimeout(() => { updateLogFilterIconState(); loadLog(true); }, 350);
+}
 function clearLogFilters() {
-  document.getElementById('logFilterEmployee').value = '';
-  document.getElementById('logFilterType').value = '';
+  msState.logEmp.selected.clear();
+  msState.logType.selected.clear();
+  msRenderList('logEmp'); msRenderList('logType'); renderLogChips();
   document.getElementById('logSearch').value = '';
+  document.getElementById('logSearch').classList.remove('has-value');
+  updateLogFilterIconState();
   loadLog(true);
 }
 
-function renderLog(entries) {
+function renderLogTable(entries) {
   const body = document.getElementById('logBody');
-  if (!entries.length) { body.innerHTML = '<div class="log-empty">لا توجد نتائج تطابق الفلاتر المحددة</div>'; return; }
-  const TYPE_LABELS = { create: 'إنشاء', update: 'تعديل', delete: 'حذف', reconcile: 'Reconcile' };
-  const TYPE_CLASS  = { create: 'log-type-ok', update: 'wh-badge-tool', delete: 'wh-badge-danger', reconcile: 'wh-badge-warn' };
+  if (!entries.length) { body.innerHTML = '<tr class="empty-row"><td colspan="4">لا توجد نتائج تطابق الفلاتر المحددة</td></tr>'; return; }
   body.innerHTML = entries.map(e => {
-    const label = TYPE_LABELS[e.type] || e.type;
-    const cls = TYPE_CLASS[e.type] || 'wh-badge-tool';
-    const emp = e.employee ? `<span class="log-emp-badge">👤 ${e.employee.replace(/_/g, ' ')}</span>` : '';
-    const dateStr = e.timestamp ? formatDateTime(e.timestamp) : '—';
-    return `<div class="log-entry">
-      <div class="log-entry-content">
-        <div class="log-entry-top"><span class="wh-badge ${cls}">${label}</span>${emp}</div>
-        <div class="log-meta">${dateStr}</div>
-        ${e.notes ? `<div class="log-notes">📝 ${e.notes}</div>` : ''}
-      </div></div>`;
+    const label = LOG_TYPE_LABELS[e.type] || e.type;
+    const cls = LOG_TYPE_CLASS[e.type] || 'wh-badge-tool';
+    return `<tr>
+      <td>${e.timestamp ? formatDateTime(e.timestamp) : '—'}</td>
+      <td>${e.employee ? e.employee.replace(/_/g, ' ') : '—'}</td>
+      <td><span class="wh-badge ${cls}">${label}</span></td>
+      <td style="text-align:right;white-space:normal;">${e.notes ? `📝 ${e.notes}` : '—'}</td>
+    </tr>`;
   }).join('');
 }
 
 async function exportLogXlsx() {
-  const employee = document.getElementById('logFilterEmployee').value;
+  const employee = [...msState.logEmp.selected].join(',');
+  const type     = [...msState.logType.selected].join(',');
   const search   = document.getElementById('logSearch').value.trim();
   try {
-    const data = await apiGet('get_logs_export', { employee, search });
+    const data = await apiGet('get_logs_export', { employee, type, search });
     const rows = (data.entries || []).map(e => ({
-      'التاريخ':   e.timestamp ? formatDate(e.timestamp) : null,
-      'الوقت':     e.timestamp ? formatDateTime(e.timestamp).split(' الساعة ')[1] : null,
+      'التاريخ':   e.timestamp ? formatDateForExport(e.timestamp) : null,
+      'الوقت':     e.timestamp ? formatTimeForExport(e.timestamp) : null,
       'الموظف':    e.employee ? e.employee.replace(/_/g, ' ') : null,
-      'النوع':     e.type,
+      'النوع':     LOG_TYPE_LABELS[e.type] || e.type,
       'الملاحظات': e.notes || null,
     }));
     if (!rows.length) { showToast('لا توجد بيانات للتصدير', 'error'); return; }
@@ -1730,6 +2105,7 @@ async function exportLogXlsx() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
+renderVersionUI();
 updateSettingsBtn();
 updateLoginSettingsBtnState();
 loadEmployeesList();
