@@ -1,0 +1,46 @@
+{
+  "tool": "webhook_control_center",
+  "since": null,
+  "types": {
+    "login": {
+      "result": null,
+      "stage": null,
+      "desc": "دخول موظف"
+    },
+    "logout": {
+      "result": null,
+      "stage": null,
+      "desc": "خروج موظف"
+    },
+    "create": {
+      "result": null,
+      "stage": null,
+      "desc": "إنشاء webhook subscription"
+    },
+    "delete": {
+      "result": null,
+      "stage": null,
+      "desc": "حذف webhook subscription"
+    },
+    "pause": {
+      "result": null,
+      "stage": null,
+      "desc": "إيقاف مؤقت لـ webhook"
+    },
+    "reconcile": {
+      "result": null,
+      "stage": null,
+      "desc": "مطابقة الـ subscriptions مع شوبيفاي"
+    },
+    "resume": {
+      "result": null,
+      "stage": null,
+      "desc": "استئناف webhook"
+    },
+    "update": {
+      "result": null,
+      "stage": null,
+      "desc": "تعديل webhook subscription"
+    }
+  }
+}
