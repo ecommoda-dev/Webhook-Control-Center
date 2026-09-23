@@ -9,7 +9,7 @@
 | الواجهة | GitHub Pages — `index.html` |
 | الـ Worker | Cloudflare — `webhook-control-center-worker` (`index.js` + `wrangler.toml`) |
 
-`Index.html` (بحرف كبير) صفحة تحويل للروابط القديمة بس.
+اتشالت `Index.html` — 23-09-2026، قرار أحمد. الرابط الوحيد: `https://ecommoda-dev.github.io/Webhook-Control-Center/`
 
 القطعتين بينشروا أوتوماتيك من `main`. الـ Worker بياخد ثواني، الـ Pages بتاخد أطول — طبيعي تلاقي نافذة زمنية القطعتين فيها مش متطابقين.
 
